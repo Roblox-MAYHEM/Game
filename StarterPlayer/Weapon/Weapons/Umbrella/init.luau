@@ -67,7 +67,7 @@ function Weapon.new(opts)
 	self.Animations.Lunge:SetDuration(self.LungeInfo.ACTIVE_TIME + self.LungeInfo.OPEN_TIME)
 	self.Animations.Open:SetDuration(0.17)
 
-	self._trove:Connect(self.Animations.Open.Ended, function()
+	self._trove:Connect(self.Animations.Open.Stopped, function()
 		if self.States.Gliding then
 			self.Animations.OpenIdle:Play()
 		end
