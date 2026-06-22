@@ -24,6 +24,8 @@ return function(
 		ShowLevel: UsedAs<boolean>?,
 		Level: UsedAs<number>?,
 		barSize: UsedAs<number>?,
+		SlotCost: UsedAs<number>?,
+		Locked: UsedAs<boolean>?,
 		OnMouseDown: (() -> ())?,
 		Parent: UsedAs<Instance?>,
 		LayoutOrder: UsedAs<number>?,
@@ -43,6 +45,11 @@ return function(
 		if explicit ~= nil then return explicit end
 		local n = use(props.ItemName)
 		return n and getIconFor(n) or ""
+	end)
+
+	local slotCostText = scope:Computed(function(use)
+		local cost = if typeof(props.SlotCost) == "number" then props.SlotCost elseif props.SlotCost then use(props.SlotCost) else 1
+		return if cost and cost > 1 then `x{cost}` else ""
 	end)
 		
 	return scope:Hydrate(template) {
@@ -92,6 +99,50 @@ return function(
 				Visible = scope:Computed(function(use)
 					return use(props.Disabled) or false
 				end),
+			},
+
+			scope:New "TextLabel" {
+				Name = "Locked",
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				BackgroundColor3 = Color3.fromRGB(15, 15, 18),
+				BackgroundTransparency = 0.15,
+				BorderSizePixel = 0,
+				Font = Enum.Font.GothamBold,
+				Position = UDim2.fromScale(0.5, 0.5),
+				Size = UDim2.fromScale(0.72, 0.26),
+				Text = "LOCKED",
+				TextColor3 = Color3.new(1, 1, 1),
+				TextScaled = true,
+				Visible = scope:Computed(function(use)
+					return use(props.Locked) or false
+				end),
+				ZIndex = 20,
+
+				[Children] = scope:New "UICorner" {
+					CornerRadius = UDim.new(0, 5),
+				},
+			},
+
+			scope:New "TextLabel" {
+				Name = "SlotCost",
+				AnchorPoint = Vector2.new(1, 0),
+				BackgroundColor3 = Color3.fromRGB(15, 15, 18),
+				BackgroundTransparency = 0.15,
+				BorderSizePixel = 0,
+				Font = Enum.Font.GothamBold,
+				Position = UDim2.new(1, -4, 0, 4),
+				Size = UDim2.fromOffset(30, 18),
+				Visible = scope:Computed(function(use)
+					return use(slotCostText) ~= ""
+				end),
+				Text = slotCostText,
+				TextColor3 = Color3.new(1, 1, 1),
+				TextScaled = true,
+				ZIndex = 21,
+
+				[Children] = scope:New "UICorner" {
+					CornerRadius = UDim.new(0, 4),
+				},
 			},
 		}
 	}

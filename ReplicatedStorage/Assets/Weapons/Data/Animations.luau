@@ -131,4 +131,20 @@ return {
 		["FanFire"] 	= {"18878470833", Enum.AnimationPriority.Action2, true},
 		["Reload"] 	= {"18878465093", Enum.AnimationPriority.Action2, true},
 	},
+	
+	["ClassicSword"] = {
+		["Idle"] 	= {"113010802022760", Enum.AnimationPriority.Action, true},
+		["Equip"] 	= {"17075350395", Enum.AnimationPriority.Action2, true},
+		["Slash"] 	= {"101685279085921", Enum.AnimationPriority.Action2, true}, -- 522638767, temp
+		["Lunge"] 	= {"522638767", Enum.AnimationPriority.Action2, true},
+	},
+	
+	["GreatSword"] = {
+		["Idle"] 	= {"83160232608247", Enum.AnimationPriority.Action, true},
+		["Run"] 	= {"77194392753771", Enum.AnimationPriority.Action2, true},
+		["Equip"] 	= {"17075350395", Enum.AnimationPriority.Action2, true}, 
+		["Swing1"] 	= {"110963996573318", Enum.AnimationPriority.Action2, true},
+		["Swing2"] 	= {"89804779278247", Enum.AnimationPriority.Action2, true},
+		["Swing3"] 	= {"135893471493932", Enum.AnimationPriority.Action2, true},
+	},
 }

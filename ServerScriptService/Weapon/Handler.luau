@@ -83,20 +83,65 @@ local function canUseWeapon(player: Player): boolean
 		and isDeployedPlayer(player, character)
 end
 
+local function getWeaponSlotCost(weaponName: string): number
+	local weaponConfig = require(ConfigModule)[weaponName]
+	local cost = weaponConfig and weaponConfig.SLOT_COST
+	return if typeof(cost) == "number" then math.clamp(cost, 1, 3) else 1
+end
+
+local function isValidHotbar(newHotbar: { string }, inventory): boolean
+	local seen = {}
+	local occupied = {}
+
+	for slot = 1, 3 do
+		local weaponName = newHotbar[slot]
+		if weaponName == nil or weaponName == false then
+			continue
+		end
+
+		if typeof(weaponName) ~= "string" or inventory[weaponName] == nil or seen[weaponName] then
+			return false
+		end
+
+		local cost = getWeaponSlotCost(weaponName)
+		if slot + cost - 1 > 3 then
+			return false
+		end
+
+		for occupiedSlot = slot, slot + cost - 1 do
+			if occupied[occupiedSlot] then
+				return false
+			end
+			occupied[occupiedSlot] = true
+		end
+
+		seen[weaponName] = true
+	end
+
+	return true
+end
+
+local function rejectHotbarEdit(player: Player)
+	local currentHotbar = DataManager.GetData(player, { "Hotbar" })
+	if typeof(currentHotbar) == "table" then
+		DataManager.SetData(player, { "Hotbar" }, table.clone(currentHotbar))
+	end
+end
+
 function WeaponSystem._RemoveHotbar(player: Player)
 	cleanupPlayerWeapons(player, true)
 end
 
 function WeaponSystem._EditHotbar(player: Player, newHotbar: { string })
-	if #newHotbar ~= 3 then return end
+	if typeof(newHotbar) ~= "table" then
+		rejectHotbarEdit(player)
+		return
+	end
 
 	local inventory = DataManager.GetData(player, { "Inventory" })
-	if not inventory then return end
-
-	for _, weaponName in ipairs(newHotbar) do
-		if inventory[weaponName] == nil then
-			return
-		end
+	if not inventory or not isValidHotbar(newHotbar, inventory) then
+		rejectHotbarEdit(player)
+		return
 	end
 
 	DataManager.SetData(player, { "Hotbar" }, newHotbar)
@@ -125,6 +170,10 @@ function WeaponSystem._CreateHotbar(player: Player)
 	end
 
 	for _, name in ipairs(savedHotbar) do
+		if typeof(name) ~= "string" then
+			continue
+		end
+
 		local weaponModule = Weapons[name]
 		local weaponModel = WeaponModels:FindFirstChild(name)
 
@@ -292,6 +341,11 @@ Remotes.WeaponEquip.OnServerEvent:Connect(function(player, weaponName)
 	local Weapon = info and info.Hotbar[weaponName]
 
 	if not Weapon then
+		Remotes.WeaponEquip:FireClient(player, false, weaponName)
+		return
+	end
+
+	if info.EquippedWeapon and info.EquippedWeapon.CanUnequip and not info.EquippedWeapon:CanUnequip() then
 		Remotes.WeaponEquip:FireClient(player, false, weaponName)
 		return
 	end

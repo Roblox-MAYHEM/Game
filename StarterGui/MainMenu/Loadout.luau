@@ -30,7 +30,9 @@ local Replica = require(Client.Packages.ReplicaClient)
 
 type DragInfo = {
 	id: string,
-	mouseOffset: Vector2
+	mouseOffset: Vector2,
+	source: string?,
+	sourceSlot: number?,
 }
 
 local scope = scoped(Fusion, { ItemTemplate = ItemTemplate })
@@ -44,20 +46,124 @@ local dropTargetIndex: Fusion.Value<number?> = scope:Value() -- which hotbar slo
 local currentlyDragging: Fusion.Value<DragInfo?> = scope:Value()
 
 local setState
+local MAX_SLOTS = 3
+local SLOT_SIZE = 64
+local SLOT_GAP = 8
+local pendingHotbar = nil
+local shakeToken = 0
 
-local function hotbarContains(name: string): boolean
-	if not peek(hotbarState) then return false end
-	
-	for _, w in peek(hotbarState) do
-		if w == name then return true end
+local function getSlotCost(name: string): number
+	local info = WeaponInfo[name]
+	local cost = info and info.SLOT_COST
+	return if typeof(cost) == "number" then math.clamp(cost, 1, 3) else 1
+end
+
+local function slotWidth(cost: number): number
+	return SLOT_SIZE * cost + SLOT_GAP * (cost - 1)
+end
+
+local function normalizeHotbar(hotbar): { any }
+	local slots = table.create(MAX_SLOTS, false)
+	local explicit = false
+
+	for slot = 1, MAX_SLOTS do
+		if hotbar and hotbar[slot] == false then
+			explicit = true
+			break
+		end
 	end
-	return false
+
+	if explicit then
+		for slot = 1, MAX_SLOTS do
+			slots[slot] = if typeof(hotbar[slot]) == "string" then hotbar[slot] else false
+		end
+		return slots
+	end
+
+	local slot = 1
+	for _, weaponName in ipairs(hotbar or {}) do
+		if typeof(weaponName) == "string" and slot <= MAX_SLOTS then
+			slots[slot] = weaponName
+			slot += getSlotCost(weaponName)
+		end
+	end
+
+	return slots
+end
+
+local function sameHotbar(a, b): boolean
+	a = normalizeHotbar(a)
+	b = normalizeHotbar(b)
+
+	for slot = 1, MAX_SLOTS do
+		if a[slot] ~= b[slot] then return false end
+	end
+
+	return true
+end
+
+local function clearWeapon(slots, name: string)
+	for slot = 1, MAX_SLOTS do
+		if slots[slot] == name then
+			slots[slot] = false
+		end
+	end
+end
+
+local function spansOverlap(aStart: number, aCost: number, bStart: number, bCost: number): boolean
+	return aStart <= bStart + bCost - 1 and bStart <= aStart + aCost - 1
+end
+
+local function dropStart(slot: number, name: string): number
+	local cost = getSlotCost(name)
+	return math.clamp(slot, 1, MAX_SLOTS - cost + 1)
+end
+
+local function shakeHotbar()
+	shakeToken += 1
+	local token = shakeToken
+	local origin = HotbarUI.Position
+
+	task.spawn(function()
+		for _, x in ipairs({ -6, 6, -4, 4, 0 }) do
+			if token ~= shakeToken then return end
+			HotbarUI.Position = origin + UDim2.fromOffset(x, 0)
+			task.wait(0.035)
+		end
+		HotbarUI.Position = origin
+	end)
+end
+
+local function submitHotbar()
+	local hotbar = normalizeHotbar(peek(hotbarState))
+	pendingHotbar = hotbar
+	Events.EditHotbar:FireServer(hotbar)
 end
 
 local function setHotbarSlot(idx: number, name: string): boolean
-	if hotbarContains(name) then return false end
-	local arr = table.clone(peek(hotbarState))
-	arr[idx] = name
+	local arr = normalizeHotbar(peek(hotbarState))
+	local cost = getSlotCost(name)
+	local start = dropStart(idx, name)
+
+	clearWeapon(arr, name)
+
+	for slot = 1, MAX_SLOTS do
+		local weaponName = arr[slot]
+		if typeof(weaponName) == "string" and spansOverlap(slot, getSlotCost(weaponName), start, cost) then
+			arr[slot] = false
+		end
+	end
+
+	arr[start] = name
+	hotbarState:set(arr)
+	return true
+end
+
+local function removeHotbarSlot(slot: number): boolean
+	local arr = normalizeHotbar(peek(hotbarState))
+	if typeof(arr[slot]) ~= "string" then return false end
+
+	arr[slot] = false
 	hotbarState:set(arr)
 	return true
 end
@@ -72,7 +178,14 @@ end
 
 --TODO: add lazy updates
 local function syncHotbar(data)
-	hotbarState:set(table.clone(data.Hotbar or {}))
+	local nextHotbar = normalizeHotbar(data.Hotbar)
+	if pendingHotbar then
+		if not sameHotbar(nextHotbar, pendingHotbar) then
+			shakeHotbar()
+		end
+		pendingHotbar = nil
+	end
+	hotbarState:set(nextHotbar)
 end
 
 local function syncInventory(data)
@@ -99,28 +212,127 @@ function module:Init(Properties)
 			mousePos:set(UserInputService:GetMouseLocation())
 		end
 	end))
+
+	local dropPreviewState = scope:Computed(function(use)
+		local dragInfo = use(currentlyDragging)
+		local slot = use(dropTargetIndex)
+		if not dragInfo or not slot then return nil end
+
+		local start = dropStart(slot, dragInfo.id)
+		return {
+			Start = start,
+			End = start + getSlotCost(dragInfo.id) - 1,
+		}
+	end)
+
+	local function isCovered(hotbar, slot: number): boolean
+		for start = 1, slot - 1 do
+			local weaponName = hotbar[start]
+			if typeof(weaponName) == "string" and slot <= start + getSlotCost(weaponName) - 1 then
+				return true
+			end
+		end
+
+		return false
+	end
+
+	local function isPreviewed(preview, slot: number, cost: number): boolean
+		return preview ~= nil and slot <= preview.End and preview.Start <= slot + cost - 1
+	end
 	
 	
 	local Hotbar = scope:ForPairs(hotbarState, function(use, scope : Fusion.Scope, index : number, weaponName : any)
-		return
-			index,
-			scope:New "Frame" {
+		local hotbar = use(hotbarState)
+		if isCovered(hotbar, index) then
+			return index, scope:New "Frame" {
+				LayoutOrder = index,
+				Size = UDim2.fromOffset(0, 0),
+				Visible = false,
+			}
+		end
+
+		local preview = use(dropPreviewState)
+		local cost = if typeof(weaponName) == "string" then getSlotCost(weaponName) else 1
+		local highlighted = isPreviewed(preview, index, cost)
+
+		local function onSlotEnter()
+			dropTargetIndex:set(index :: number)
+		end
+
+		local function onSlotLeave()
+			if peek(dropTargetIndex) == index then dropTargetIndex:set(nil) end
+		end
+
+		if typeof(weaponName) ~= "string" then
+			return index, scope:New "Frame" {
 				Name = `Slot_{index}`,
 				LayoutOrder = index,
-				Size = UDim2.fromOffset(64, 64),
+				Size = UDim2.fromOffset(SLOT_SIZE, SLOT_SIZE),
+				BackgroundColor3 = if highlighted then Color3.fromRGB(95, 120, 255) else Color3.fromRGB(20, 22, 28),
+				BackgroundTransparency = if highlighted then 0.2 else 0.45,
 				Parent = HotbarUI,
 
+				[OnEvent "MouseEnter"] = onSlotEnter,
+				[OnEvent "MouseLeave"] = onSlotLeave,
+
 				[Children] = {
-					scope:ItemTemplate { ItemName = weaponName },
+					scope:New "UICorner" {
+						CornerRadius = UDim.new(0, 6),
+					},
+					scope:New "UIStroke" {
+						Color = if highlighted then Color3.fromRGB(180, 195, 255) else Color3.fromRGB(70, 74, 86),
+						Transparency = if highlighted then 0.1 else 0.45,
+					},
 				},
+			}
+		end
 
-				[OnEvent "MouseEnter"] = function()
-					dropTargetIndex:set(index :: number)
-				end,
+		local absPosVal: Fusion.Value<Vector2> = scope:Value(Vector2.zero)
+		local source = `Hotbar_{index}`
+		local dragScope = scope:innerScope({ Draggable = Draggable })
+		local selfDragInfo = dragScope:Computed(function(use)
+			local info = use(currentlyDragging)
+			return (info and info.source == source) and info or nil
+		end)
 
-				[OnEvent "MouseLeave"] = function()
-					if peek(dropTargetIndex) == index then dropTargetIndex:set(nil) end
-				end,
+		return
+			index,
+			dragScope:Draggable {
+				ID = weaponName,
+				Name = `Slot_{index}`,
+				Parent = HotbarUI,
+				Layout = {
+					LayoutOrder = index,
+					Size = UDim2.fromOffset(slotWidth(cost), SLOT_SIZE),
+					OutAbsolutePosition = absPosVal,
+				},
+				Dragging = { MousePosition = mousePos, SelfDragInfo = selfDragInfo, OverlayFrame = OverlayFrame },
+
+				[Children] = {
+					scope:New "Frame" {
+						BackgroundTransparency = 1,
+						Size = UDim2.fromScale(1, 1),
+
+						[OnEvent "MouseEnter"] = onSlotEnter,
+						[OnEvent "MouseLeave"] = onSlotLeave,
+
+						[Children] = scope:ItemTemplate {
+							ItemName = weaponName,
+							SlotCost = cost,
+							Size = UDim2.fromScale(1, 1),
+							OnMouseDown = function()
+								if peek(currentlyDragging) ~= nil then return end
+								local offset = peek(mousePos) - (peek(absPosVal) or Vector2.zero)
+								currentlyDragging:set({
+									id = weaponName,
+									mouseOffset = offset,
+									source = source,
+									sourceSlot = index,
+								})
+							end,
+						},
+					},
+				}
 			}
 	end)
 
@@ -132,7 +344,7 @@ function module:Init(Properties)
 		local owned = scope:Computed(function(use) return use(inventoryState)[weaponName] ~= nil end)
 		local selfDragInfo = scope:Computed(function(use)
 			local info = use(currentlyDragging)
-			return (info and info.id == weaponName) and info or nil
+			return (info and info.id == weaponName and info.source == "Inventory") and info or nil
 		end)
 		
 
@@ -140,10 +352,11 @@ function module:Init(Properties)
 			ID = weaponName,
 			Name = weaponName,
 			Parent = InventoryUI,
-			Layout = { Size = UDim2.new(1, 0, 1, 0), OutAbsolutePosition = absPosVal },
+			Layout = { Size = UDim2.fromOffset(slotWidth(getSlotCost(weaponName)), SLOT_SIZE), OutAbsolutePosition = absPosVal },
 			Dragging = { MousePosition = mousePos, SelfDragInfo = selfDragInfo, OverlayFrame = OverlayFrame },
 			[Children] = ItemTemplate(scope, {
 				ItemName = weaponName,
+				SlotCost = getSlotCost(weaponName),
 				ShowLevel = scope:Computed(function(use) return not (use(currentlyDragging) and use(currentlyDragging).id == weaponName) end),
 				Level = scope:Computed(function(use) return use(owned) and use(inventoryState)[weaponName].Level or nil end),
 				barSize = scope:Computed(function(use)
@@ -153,11 +366,12 @@ function module:Init(Properties)
 					return UDim2.new(ratio, 0, 1, 0)
 				end),
 				Disabled = scope:Computed(function(use) return not use(owned) end),
+				Locked = scope:Computed(function(use) return not use(owned) end),
 				OnMouseDown = function()
 					if peek(currentlyDragging) ~= nil then return end
 					if not peek(inventoryState)[weaponName] then return end
 					local offset = peek(mousePos) - (peek(absPosVal) or Vector2.zero)
-					currentlyDragging:set({ id = weaponName, mouseOffset = offset })
+					currentlyDragging:set({ id = weaponName, mouseOffset = offset, source = "Inventory" })
 				end,
 			})
 		}
@@ -172,10 +386,21 @@ function module:Init(Properties)
 		if not dragInfo then return end
 
 		local slotIdx = peek(dropTargetIndex)
-		if slotIdx and setHotbarSlot(slotIdx, dragInfo.id) then
-			Events.EditHotbar:FireServer(peek(hotbarState))
+		local changed = false
+
+		if slotIdx then
+			changed = setHotbarSlot(slotIdx, dragInfo.id)
+		elseif dragInfo.sourceSlot then
+			changed = removeHotbarSlot(dragInfo.sourceSlot)
 		end
 
+		if changed then
+			submitHotbar()
+		elseif dragInfo.sourceSlot then
+			shakeHotbar()
+		end
+
+		dropTargetIndex:set(nil)
 		currentlyDragging:set(nil)
 	end))
 	

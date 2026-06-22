@@ -19,6 +19,7 @@ local SCROLL_SENSITIVITY = 0.5
 local EQUIP_COOLDOWN = 0.05
 local HOTBAR_MODEL_TIMEOUT = 0.5
 local HOTBAR_REVISION_TIMEOUT = 2
+local HOTBAR_SIZE = 3
 
 local function requireFresh(Module: ModuleScript)
 	if not RunService:IsStudio() then
@@ -76,6 +77,12 @@ function WeaponSystem:Init(properties)
 		Bindables.WeaponEquip:Fire(nil)
 	end
 
+	local function canUnequipCurrent()
+		return not equippedWeapon
+			or not equippedWeapon.CanUnequip
+			or equippedWeapon:CanUnequip()
+	end
+
 	local function waitForServerHotbarRevision(revision)
 		local deadline = os.clock() + HOTBAR_REVISION_TIMEOUT
 		while revision and PlayerHotbar:GetAttribute(CONFIG_REVISION_ATTRIBUTE) ~= revision and os.clock() < deadline do
@@ -85,6 +92,7 @@ function WeaponSystem:Init(properties)
 
 	local function equipWeapon(Weapon, force)
 		if not Weapon or Weapon == equippedWeapon or (equipDebounce and not force) then return end
+		if not force and not canUnequipCurrent() then return end
 
 		if not enabledPlayers then
 			unequipWeapon()
@@ -111,6 +119,25 @@ function WeaponSystem:Init(properties)
 		Weapon:Equip()
 	end
 
+	local function firstHotbarIndex()
+		for index = 1, HOTBAR_SIZE do
+			if hotbar[index] then return index end
+		end
+		return nil
+	end
+
+	local function nextHotbarIndex(fromIndex, delta)
+		local direction = if delta > 0 then 1 else -1
+		local index = fromIndex
+
+		for _ = 1, HOTBAR_SIZE do
+			index = ((index - 1 + direction) % HOTBAR_SIZE) + 1
+			if hotbar[index] then return index end
+		end
+
+		return fromIndex
+	end
+
 	local function rebuildHotbar(equippedName, equippedIndex, forceEquip)
 		equippedWeapon = nil
 		currentIndex = 1
@@ -125,7 +152,11 @@ function WeaponSystem:Init(properties)
 			end
 		end
 
-		for _, weaponName in ipairs(Replica.Data.Hotbar) do
+		for slot, weaponName in ipairs(Replica.Data.Hotbar) do
+			if typeof(weaponName) ~= "string" then
+				continue
+			end
+
 			local Model = (equippedName and Player.Character:WaitForChild(weaponName, HOTBAR_MODEL_TIMEOUT)) or PlayerHotbar:WaitForChild(weaponName, HOTBAR_MODEL_TIMEOUT)
 			local Module = weaponModules[weaponName]
 
@@ -136,18 +167,19 @@ function WeaponSystem:Init(properties)
 					Context = properties,
 				})
 
-				table.insert(hotbar, Weapon)
+				hotbar[slot] = Weapon
 				WeaponTrove:Add(Weapon)
 			end
 		end
 
-		if #hotbar == 0 then
+		local firstIndex = firstHotbarIndex()
+		if not firstIndex then
 			unequipWeapon()
 			return
 		end
 
-		local targetIndex = equippedIndex and hotbar[equippedIndex] and equippedIndex or 1
-		for index, Weapon in ipairs(hotbar) do
+		local targetIndex = equippedIndex and hotbar[equippedIndex] and equippedIndex or firstIndex
+		for index, Weapon in pairs(hotbar) do
 			if Weapon.Name == equippedName then
 				targetIndex = index
 				break
@@ -190,11 +222,11 @@ function WeaponSystem:Init(properties)
 	end)
 
 	Trove:Connect(UserInputService.InputChanged, function(input, gameProcessed)
-		if gameProcessed or input.UserInputType ~= Enum.UserInputType.MouseWheel or #hotbar == 0 then return end
+		if gameProcessed or input.UserInputType ~= Enum.UserInputType.MouseWheel or not firstHotbarIndex() then return end
 
 		local scrollDelta = math.round(input.Position.Z * SCROLL_SENSITIVITY)
 		if scrollDelta ~= 0 then
-			currentIndex = math.clamp(currentIndex + scrollDelta, 1, #hotbar)
+			currentIndex = nextHotbarIndex(currentIndex, scrollDelta)
 			equipWeapon(hotbar[currentIndex])
 		end
 	end)

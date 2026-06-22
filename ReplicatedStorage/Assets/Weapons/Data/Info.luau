@@ -19,6 +19,22 @@ return {
 		CATEGORY = "Melee",
 		DESCRIPTION = "",
 	},
+
+	["ClassicSword"] = {
+		NAME = "Classic Sword",
+		THUMBNAIL = "https://www.roblox.com/asset-thumbnail/image?assetId=125013769&width=420&height=420&format=png",
+		CATEGORY = "Melee",
+		DESCRIPTION = "",
+		SLOT_COST = 1,
+	},
+
+	["GreatSword"] = {
+		NAME = "Greatsword",
+		THUMBNAIL = "https://www.roblox.com/asset-thumbnail/image?assetId=125013769&width=420&height=420&format=png",
+		CATEGORY = "Melee",
+		DESCRIPTION = "",
+		SLOT_COST = 3,
+	},
 	
 	["Illumina"] = {
 		NAME = "Illumina",
@@ -111,5 +127,4 @@ return {
 		DESCRIPTION = "",
 	}
 }
-
 

@@ -616,6 +616,76 @@ return {
 		}
 	},
 
+	["ClassicSword"] = {
+		EQUIP_LOAD = 0.8,
+
+		["Equip"] = {
+			TIME = 0.25,
+			JOINT_C1 = CFrame.new(0, 0, -1.70000005, 0, 0, 1, 1, 0, 0, 0, 1, 0),
+			CAM_OFFSET = CFrame.new(0, 0, -1),
+			CAN_SWAY = true,
+			TILT = 8,
+		},
+		["Attack"] = {
+			TIME = 0.35,
+			COOLDOWN = 0.15,
+			DMG = 15,
+			WINDOW = 1,
+			RANGE = 35,
+			ARC = 140,
+			HIT_DEBOUNCE = 0.08,
+			LOS = true,
+		},
+		["Lunge"] = {
+			TIME = 0.8,
+			HIT_TIME = 0.55,
+			COOLDOWN = 0.45,
+			COMBO_WINDOW = 0.25,
+			DMG = 30,
+			WINDOW = 1.1,
+			RANGE = 45,
+			ARC = 130,
+			HIT_DEBOUNCE = 0.12,
+			LOS = true,
+			FLOAT_VELOCITY = Vector3.new(0, 16, 0),
+			FORWARD_VELOCITY = 26,
+			GRIP_OUT = CFrame.new(0, 0, -0.75),
+			KNOCKBACK_FORCE = 35,
+			KNOCKBACK_Y = 8,
+			KNOCKBACK_DURATION = 0.2,
+		},
+	},
+
+	["GreatSword"] = {
+		SLOT_COST = 3,
+		EQUIP_LOAD = 1.8,
+
+		["Equip"] = {
+			TIME = 0.45,
+			JOINT_C1 = CFrame.new(0, 0, 0),
+			CAM_OFFSET = CFrame.new(0.5, 0.1, -1.25),
+			CAN_SWAY = true,
+			TILT = 4,
+			SCALE = 1.35,
+		},
+		["Attack"] = {
+			TIME = 1.35,
+			HIT_DELAY = 0.45,
+			HIT_TIME = 0.45,
+			COOLDOWN = 0.25,
+			DMG = 75,
+			WINDOW = 1.5,
+			RANGE = 60,
+			ARC = 170,
+			HIT_DEBOUNCE = 0.2,
+			LOS = true,
+			KNOCKBACK_FORCE = 85,
+			KNOCKBACK_Y = 18,
+			KNOCKBACK_YMAX = 28,
+			KNOCKBACK_DURATION = 0.35,
+		},
+	},
+
 	["Revolver"] = {
 		EQUIP_LOAD = 0.7, --1.2
 

@@ -18,7 +18,17 @@ return {
 			Level = 1,
 			Exp = 0,
 			ExpRequired = 100,
-		}
+		},
+		["ClassicSword"] = {
+			Level = 1,
+			Exp = 0,
+			ExpRequired = 100,
+		},
+		["GreatSword"] = {
+			Level = 1,
+			Exp = 0,
+			ExpRequired = 100,
+		},
 	},
 	Hotbar = {"Pistol", "DBShotgun", "Umbrella"},
 	Crates = {},

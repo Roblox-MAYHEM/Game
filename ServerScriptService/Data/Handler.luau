@@ -23,6 +23,17 @@ local WeaponsList = require(ReplicatedStorage.Assets.Weapons.List)
 
 local module = {}
 
+local STARTER_WEAPON_DATA = {
+	Level = 1,
+	Exp = 0,
+	ExpRequired = 100,
+}
+
+local function ensureWeapon(data, weaponName: string)
+	data.Inventory = data.Inventory or {}
+	data.Inventory[weaponName] = data.Inventory[weaponName] or table.clone(STARTER_WEAPON_DATA)
+end
+
 local function CleanupPlayerReplica(plr: Player)
 	local replica = DataManager.DataReplica[plr]
 	if replica then
@@ -60,6 +71,8 @@ local function PlayerAdded(plr : Player)
 
 		profile:AddUserId(plr.UserId) --GDPR compliance
 		profile:Reconcile() -- Fill in missing variables from Template
+		ensureWeapon(profile.Data, "ClassicSword")
+		ensureWeapon(profile.Data, "GreatSword")
 
 		-- handles session locking
 		profile.OnSessionEnd:Connect(function()
