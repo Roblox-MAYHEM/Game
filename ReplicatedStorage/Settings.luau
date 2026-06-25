@@ -1,5 +1,5 @@
 local module = {
-	VisualizeDebug = true,
+	VisualizeDebug = false,
 }
 
 return module

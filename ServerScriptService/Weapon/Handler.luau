@@ -145,6 +145,7 @@ function WeaponSystem._EditHotbar(player: Player, newHotbar: { string })
 	end
 
 	DataManager.SetData(player, { "Hotbar" }, newHotbar)
+	WeaponSystem._ReloadHotbar(player)
 end
 
 function WeaponSystem._CreateHotbar(player: Player)

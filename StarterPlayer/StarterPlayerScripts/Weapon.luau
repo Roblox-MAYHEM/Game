@@ -17,7 +17,7 @@ local KEYNUMS = {
 local CONFIG_REVISION_ATTRIBUTE = "DevConfigRevision"
 local SCROLL_SENSITIVITY = 0.5
 local EQUIP_COOLDOWN = 0.05
-local HOTBAR_MODEL_TIMEOUT = 0.5
+local HOTBAR_MODEL_TIMEOUT = 2
 local HOTBAR_REVISION_TIMEOUT = 2
 local HOTBAR_SIZE = 3
 
@@ -157,7 +157,9 @@ function WeaponSystem:Init(properties)
 				continue
 			end
 
-			local Model = (equippedName and Player.Character:WaitForChild(weaponName, HOTBAR_MODEL_TIMEOUT)) or PlayerHotbar:WaitForChild(weaponName, HOTBAR_MODEL_TIMEOUT)
+			local Model = if weaponName == equippedName
+				then Player.Character:WaitForChild(weaponName, HOTBAR_MODEL_TIMEOUT)
+				else PlayerHotbar:WaitForChild(weaponName, HOTBAR_MODEL_TIMEOUT)
 			local Module = weaponModules[weaponName]
 
 			if Model and Module then
@@ -195,6 +197,10 @@ function WeaponSystem:Init(properties)
 	end
 
 	rebuildHotbar(nil, nil, true)
+
+	Trove:Add(Replica:OnSet({ "Hotbar" }, function()
+		rebuildHotbar(equippedWeapon and equippedWeapon.Name or nil, currentIndex, true)
+	end))
 
 	if RunService:IsStudio() then
 		local configReloadQueued = false

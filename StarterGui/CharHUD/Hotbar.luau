@@ -34,6 +34,18 @@ local function slotWidth(cost: number): number
 	return SLOT_SIZE * cost + SLOT_GAP * (cost - 1)
 end
 
+local function slotPosition(slot: number): UDim2
+	return UDim2.fromOffset((slot - 1) * (SLOT_SIZE + SLOT_GAP), 0)
+end
+
+local function disableSlotLayout(container: Instance)
+	for _, child in ipairs(container:GetChildren()) do
+		if child:IsA("UIGridLayout") or child:IsA("UIListLayout") then
+			child:Destroy()
+		end
+	end
+end
+
 local function normalizeHotbar(hotbar): { any }
 	local slots = table.create(MAX_SLOTS, false)
 	local explicit = false
@@ -77,6 +89,7 @@ end
 function module:Init(Properties: {Scope : Fusion.Scope, UI : ScreenGui, Replica : ReplicaClient.Replica})
 	local scope = Properties.Scope:innerScope({ItemTemplate = ItemTemplate})
 	local UI = Properties.UI
+	disableSlotLayout(HotbarUI)
 	
 	local equippedItem = scope:Value()
 	local hotbar = scope:Value(normalizeHotbar(Properties.Replica.Data.Hotbar))
@@ -95,6 +108,7 @@ function module:Init(Properties: {Scope : Fusion.Scope, UI : ScreenGui, Replica 
 			if isCovered(hotbarNow, index) then
 				return index, scope:New "Frame" {
 					LayoutOrder = index,
+					Position = slotPosition(index),
 					Size = UDim2.fromOffset(0, 0),
 					Visible = false,
 				}
@@ -104,6 +118,7 @@ function module:Init(Properties: {Scope : Fusion.Scope, UI : ScreenGui, Replica 
 				return index, scope:New "Frame" {
 					Name = `Slot_{index}`,
 					LayoutOrder = index,
+					Position = slotPosition(index),
 					Size = UDim2.fromOffset(SLOT_SIZE, SLOT_SIZE),
 					BackgroundColor3 = Color3.fromRGB(20, 22, 28),
 					BackgroundTransparency = 0.45,
@@ -124,6 +139,7 @@ function module:Init(Properties: {Scope : Fusion.Scope, UI : ScreenGui, Replica 
 				LayoutOrder = index,
 				ItemName = weaponName,
 				SlotCost = getSlotCost(weaponName),
+				Position = slotPosition(index),
 				Size = scope:Computed(function(use)
 					local scale = if use(equippedItem) == weaponName then 1.1 else 1
 					local width = slotWidth(getSlotCost(weaponName))

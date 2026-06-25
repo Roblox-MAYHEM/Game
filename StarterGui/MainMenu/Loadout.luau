@@ -1,6 +1,7 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local UserInputService = game:GetService("UserInputService")
+local GuiService = game:GetService("GuiService")
 local Client = game:GetService("StarterPlayer")
 
 local Player = Players.LocalPlayer
@@ -23,10 +24,7 @@ local WeaponInfo = require(ReplicatedStorage.Assets.Weapons.Data.Info)
 
 local Fusion = require(Client.Packages.Fusion)
 local scoped, peek = Fusion.scoped, Fusion.peek
-local Children, OnEvent, Out = Fusion.Children, Fusion.OnEvent, Fusion.Out
-type UsedAs<T> = Fusion.UsedAs<T>
-
-local Replica = require(Client.Packages.ReplicaClient)
+local Children, OnEvent = Fusion.Children, Fusion.OnEvent
 
 type DragInfo = {
 	id: string,
@@ -60,6 +58,35 @@ end
 
 local function slotWidth(cost: number): number
 	return SLOT_SIZE * cost + SLOT_GAP * (cost - 1)
+end
+
+local function slotPosition(slot: number): UDim2
+	return UDim2.fromOffset((slot - 1) * (SLOT_SIZE + SLOT_GAP), 0)
+end
+
+local function mousePosition(): Vector2
+	return UserInputService:GetMouseLocation() - GuiService:GetGuiInset()
+end
+
+local function disableSlotLayout(container: Instance)
+	for _, child in ipairs(container:GetChildren()) do
+		if child:IsA("UIGridLayout") or child:IsA("UIListLayout") then
+			child:Destroy()
+		end
+	end
+end
+
+local function slotAtMouse(position: Vector2): number?
+	local origin = HotbarUI.AbsolutePosition
+	local size = HotbarUI.AbsoluteSize
+	local rel = position - origin
+
+	if rel.Y < 0 or rel.Y > size.Y or rel.X < 0 then
+		return nil
+	end
+
+	local slot = math.floor((rel.X + SLOT_GAP / 2) / (SLOT_SIZE + SLOT_GAP)) + 1
+	return if slot >= 1 and slot <= MAX_SLOTS then slot else nil
 end
 
 local function normalizeHotbar(hotbar): { any }
@@ -176,7 +203,6 @@ function module.Enable()
 	module.Enabled:set(true)
 end
 
---TODO: add lazy updates
 local function syncHotbar(data)
 	local nextHotbar = normalizeHotbar(data.Hotbar)
 	if pendingHotbar then
@@ -194,24 +220,37 @@ end
 
 function module:Init(Properties)
 	local replica = Properties.Replica
+	local trove = Properties.trove
+	disableSlotLayout(HotbarUI)
+
+	HotbarUI.Size = UDim2.fromOffset(
+		MAX_SLOTS * SLOT_SIZE + (MAX_SLOTS - 1) * SLOT_GAP,
+		SLOT_SIZE
+	)
 	
-	--TODO: introduce writelibs
-	
-	Properties.trove:Add(replica:OnChange(function()
-		syncHotbar(replica.Data)
-		syncInventory(replica.Data)
+	trove:Add(replica:OnChange(function(_, path)
+		local key = path and path[1]
+		if key == "Hotbar" then
+			syncHotbar(replica.Data)
+		elseif key == "Inventory" then
+			syncInventory(replica.Data)
+		end
 	end))
 
 	-- Initial load
 	syncHotbar(replica.Data)
 	syncInventory(replica.Data)
 
-	mousePos:set(UserInputService:GetMouseLocation())
-	table.insert(scope, UserInputService.InputChanged:Connect(function(io)
+	mousePos:set(mousePosition())
+	trove:Connect(UserInputService.InputChanged, function(io)
 		if io.UserInputType == Enum.UserInputType.MouseMovement then
-			mousePos:set(UserInputService:GetMouseLocation())
+			local position = mousePosition()
+			mousePos:set(position)
+			if peek(currentlyDragging) then
+				dropTargetIndex:set(slotAtMouse(position))
+			end
 		end
-	end))
+	end)
 
 	local dropPreviewState = scope:Computed(function(use)
 		local dragInfo = use(currentlyDragging)
@@ -246,6 +285,7 @@ function module:Init(Properties)
 		if isCovered(hotbar, index) then
 			return index, scope:New "Frame" {
 				LayoutOrder = index,
+				Position = slotPosition(index),
 				Size = UDim2.fromOffset(0, 0),
 				Visible = false,
 			}
@@ -267,6 +307,7 @@ function module:Init(Properties)
 			return index, scope:New "Frame" {
 				Name = `Slot_{index}`,
 				LayoutOrder = index,
+				Position = slotPosition(index),
 				Size = UDim2.fromOffset(SLOT_SIZE, SLOT_SIZE),
 				BackgroundColor3 = if highlighted then Color3.fromRGB(95, 120, 255) else Color3.fromRGB(20, 22, 28),
 				BackgroundTransparency = if highlighted then 0.2 else 0.45,
@@ -303,12 +344,24 @@ function module:Init(Properties)
 				Parent = HotbarUI,
 				Layout = {
 					LayoutOrder = index,
+					Position = slotPosition(index),
+					ZIndex = if highlighted then 3 else 1,
 					Size = UDim2.fromOffset(slotWidth(cost), SLOT_SIZE),
 					OutAbsolutePosition = absPosVal,
 				},
 				Dragging = { MousePosition = mousePos, SelfDragInfo = selfDragInfo, OverlayFrame = OverlayFrame },
 
 				[Children] = {
+					scope:New "UICorner" {
+						CornerRadius = UDim.new(0, 6),
+					},
+					scope:New "UIStroke" {
+						Name = "DropOutline",
+						ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+						Color = if highlighted then Color3.fromRGB(180, 195, 255) else Color3.fromRGB(70, 74, 86),
+						Thickness = if highlighted then 3 else 1,
+						Transparency = if highlighted then 0 else 0.55,
+					},
 					scope:New "Frame" {
 						BackgroundTransparency = 1,
 						Size = UDim2.fromScale(1, 1),
@@ -322,13 +375,16 @@ function module:Init(Properties)
 							Size = UDim2.fromScale(1, 1),
 							OnMouseDown = function()
 								if peek(currentlyDragging) ~= nil then return end
-								local offset = peek(mousePos) - (peek(absPosVal) or Vector2.zero)
+								local position = mousePosition()
+								mousePos:set(position)
+								local offset = position - (peek(absPosVal) or Vector2.zero)
 								currentlyDragging:set({
 									id = weaponName,
 									mouseOffset = offset,
 									source = source,
 									sourceSlot = index,
 								})
+								dropTargetIndex:set(slotAtMouse(position))
 							end,
 						},
 					},
@@ -370,8 +426,11 @@ function module:Init(Properties)
 				OnMouseDown = function()
 					if peek(currentlyDragging) ~= nil then return end
 					if not peek(inventoryState)[weaponName] then return end
-					local offset = peek(mousePos) - (peek(absPosVal) or Vector2.zero)
+					local position = mousePosition()
+					mousePos:set(position)
+					local offset = position - (peek(absPosVal) or Vector2.zero)
 					currentlyDragging:set({ id = weaponName, mouseOffset = offset, source = "Inventory" })
+					dropTargetIndex:set(slotAtMouse(position))
 				end,
 			})
 		}
@@ -379,13 +438,15 @@ function module:Init(Properties)
 		return weaponName, itemEntry
 	end)
 	
-	table.insert(scope, UserInputService.InputEnded:Connect(function(io)
+	trove:Connect(UserInputService.InputEnded, function(io)
 		if io.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
 
 		local dragInfo = peek(currentlyDragging)
 		if not dragInfo then return end
 
-		local slotIdx = peek(dropTargetIndex)
+		local position = mousePosition()
+		mousePos:set(position)
+		local slotIdx = peek(dropTargetIndex) or slotAtMouse(position)
 		local changed = false
 
 		if slotIdx then
@@ -402,9 +463,9 @@ function module:Init(Properties)
 
 		dropTargetIndex:set(nil)
 		currentlyDragging:set(nil)
-	end))
+	end)
 	
-	local gui = scope:Hydrate(LoadoutUI) {
+	scope:Hydrate(LoadoutUI) {
 		Visible = module.Enabled,
 		
 		[Children] = scope:Hydrate(ContainerUI) {

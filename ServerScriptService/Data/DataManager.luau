@@ -65,7 +65,7 @@ end
 function DataManager.SetData(plr : Player, p : path, v)
 	local profile = DataManager.Profiles[plr]
 	local replica = DataManager.DataReplica[plr]
-	
+	print("EEEEE")
 	if profile and replica then
 		--to improve: iterative over keys
 		p = parsePath(p)

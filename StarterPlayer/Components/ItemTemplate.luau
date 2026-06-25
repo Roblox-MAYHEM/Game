@@ -15,6 +15,10 @@ local function getIconFor(name: string): string?
 	return info and info.THUMBNAIL or nil
 end
 
+local function rawSlotCost(props): number
+	return if typeof(props.SlotCost) == "number" then props.SlotCost else 1
+end
+
 return function(
 	scope : Fusion.Scope, 
 	props: {
@@ -29,11 +33,20 @@ return function(
 		OnMouseDown: (() -> ())?,
 		Parent: UsedAs<Instance?>,
 		LayoutOrder: UsedAs<number>?,
+		Position: UsedAs<UDim2>?,
 		Size: UsedAs<UDim2>?,
 	}
 ) : Frame
 	
 	local template = ItemTemplate:Clone()
+	if rawSlotCost(props) > 1 then
+		for _, child in ipairs(template:GetChildren()) do
+			if child:IsA("UIAspectRatioConstraint") then
+				child:Destroy()
+			end
+		end
+	end
+
 	local DragButton = template:WaitForChild("DragButton")
 	local DisabledOverlay = template:WaitForChild("DisabledOverlay")
 	local StatsFrame = template:WaitForChild("StatsFrame")
@@ -56,6 +69,7 @@ return function(
 		Parent = props.Parent,
 		LayoutOrder = props.LayoutOrder,
 		Name = props.ItemName,
+		Position = props.Position,
 		Visible = true,
 		Size = props.Size,
 		
