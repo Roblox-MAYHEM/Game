@@ -19,6 +19,7 @@ local Config = {
 	FinisherBaseSpeed = 70,
 	FinisherPowerScale = 1.25,
 	FinisherDuration = 0.2,
+	AttributionTime = 8,
 }
 
 export type ImpactHit = {
@@ -210,6 +211,10 @@ end
 
 function ImpactService.GetLastAttacker(targetCharacter: Model): Player?
 	local state = states[targetCharacter]
+	if not state or time() - state.LastHitAt > Config.AttributionTime then
+		return nil
+	end
+
 	local attacker = state and state.LastAttacker
 	return if attacker and attacker.Parent == Players then attacker else nil
 end
