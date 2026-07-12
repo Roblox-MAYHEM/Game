@@ -8,6 +8,7 @@ local WeaponAssets = ReplicatedStorage.Assets.Weapons
 local WeaponModels = WeaponAssets.Models
 local ConfigModule = WeaponAssets.Data:WaitForChild("Config")
 local BaseWeapon = require(script.Parent.BaseWeapon)
+local ImpactService = require(script.Parent.Modules.ImpactService)
 
 local CONFIG_REVISION_ATTRIBUTE = "DevConfigRevision"
 
@@ -272,6 +273,7 @@ local function setupPlayer(player: Player)
 end
 
 function WeaponSystem:Init(_Properties)
+	ImpactService:Init()
 	BaseWeapon.SetContext(_Properties)
 	Remotes.EditHotbar.OnServerEvent:Connect(WeaponSystem._EditHotbar)
 
