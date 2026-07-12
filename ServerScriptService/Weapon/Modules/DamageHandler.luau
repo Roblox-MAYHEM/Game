@@ -51,19 +51,21 @@ local function bufferHit(attacker: Player, humanoid: Humanoid, amount: number)
 	end)
 end
 
-local function publishDeath(victim: Player, lastHit: Player?)
+local function publishDeath(victim: Player, lastHit: Player?, forcedKiller: Player?)
 	local damageMap = DamageTable[victim] or {}
 
-	local killer = victim
-	local bestDamage = -math.huge
+	local killer = forcedKiller or victim
 
-	for attacker, damage in pairs(damageMap) do
-		local score = damage
-		if attacker == lastHit then score *= Config.LAST_HIT_MULTIPLIER end
+	if not forcedKiller then
+		local bestDamage = -math.huge
+		for attacker, damage in pairs(damageMap) do
+			local score = damage
+			if attacker == lastHit then score *= Config.LAST_HIT_MULTIPLIER end
 
-		if score > bestDamage then
-			bestDamage = score
-			killer = attacker
+			if score > bestDamage then
+				bestDamage = score
+				killer = attacker
+			end
 		end
 	end
 
@@ -109,7 +111,7 @@ function Damager.HealHumanoid(humanoid: Humanoid, sender: Player, amount: number
 	humanoid.Health = math.min(humanoid.MaxHealth, humanoid.Health + amount)
 end
 
-function Damager.DamageHumanoid(humanoid: Humanoid, attacker: Player, amount: number, friendlyFire: boolean?)
+function Damager.DamageHumanoid(humanoid: Humanoid, attacker: Player, amount: number, friendlyFire: boolean?, forcedKiller: Player?)
 	if not humanoid or not humanoid.Parent then return end
 	if not attacker or amount <= 0 then return end
 
@@ -153,7 +155,7 @@ function Damager.DamageHumanoid(humanoid: Humanoid, attacker: Player, amount: nu
 		end)
 
 		if victim then
-			publishDeath(victim, attacker)
+			publishDeath(victim, attacker, forcedKiller)
 		end
 
 		return
@@ -162,9 +164,9 @@ function Damager.DamageHumanoid(humanoid: Humanoid, attacker: Player, amount: nu
 	humanoid:TakeDamage(appliedDamage)
 end
 
-function Damager.KillHumanoid(humanoid: Humanoid, attacker: Player, friendlyFire: boolean?)
+function Damager.KillHumanoid(humanoid: Humanoid, attacker: Player, friendlyFire: boolean?, forcedKiller: Player?)
 	if not humanoid or not humanoid.Parent then return end
-	Damager.DamageHumanoid(humanoid, attacker, humanoid.Health, friendlyFire)
+	Damager.DamageHumanoid(humanoid, attacker, humanoid.Health, friendlyFire, forcedKiller)
 end
 
 local function setupPlayer(player: Player)

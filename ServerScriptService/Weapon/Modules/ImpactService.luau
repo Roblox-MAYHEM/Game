@@ -249,18 +249,20 @@ function ImpactService:Init()
 				continue
 			end
 
+			local shouldSync = character:GetAttribute("ImpactProtected") == true and now >= state.ProtectedUntil
+
 			if not state.Primed
 				and state.Impact > 0
 				and now - state.LastHitAt >= Config.DecayDelay
 			then
 				local nextImpact = math.max(0, state.Impact - Config.DecayPerSecond * dt)
-				if math.floor(nextImpact) ~= math.floor(state.Impact) then
-					state.Impact = nextImpact
-					setAttributes(character, state)
-				else
-					state.Impact = nextImpact
-				end
-			elseif character:GetAttribute("ImpactProtected") == true and now >= state.ProtectedUntil then
+				shouldSync = shouldSync
+					or math.floor(nextImpact) ~= math.floor(state.Impact)
+					or nextImpact == 0
+				state.Impact = nextImpact
+			end
+
+			if shouldSync then
 				setAttributes(character, state)
 			end
 		end

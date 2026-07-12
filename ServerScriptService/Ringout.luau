@@ -31,7 +31,7 @@ local function ringOut(part: BasePart)
 	end)
 
 	local attacker = ImpactService.GetLastAttacker(character) or victim
-	DamageHandler.KillHumanoid(humanoid, attacker, true)
+	DamageHandler.KillHumanoid(humanoid, attacker, true, attacker)
 end
 
 local function bindZone(instance: Instance)
@@ -44,12 +44,47 @@ local function bindZone(instance: Instance)
 	end)
 end
 
+local function ensureFallbackZone(map: Instance)
+	if not map:IsA("Model") then return end
+
+	for _, zone in ipairs(CollectionService:GetTagged("RingoutZone")) do
+		if zone:IsDescendantOf(map) then
+			return
+		end
+	end
+
+	local mapCFrame, mapSize = map:GetBoundingBox()
+	if mapSize.Magnitude <= 0 then return end
+
+	local zone = Instance.new("Part")
+	zone.Name = "GeneratedRingoutZone"
+	zone.Anchored = true
+	zone.CanCollide = false
+	zone.CanQuery = false
+	zone.CanTouch = true
+	zone.Transparency = 1
+	zone.Size = Vector3.new(math.max(mapSize.X + 200, 500), 8, math.max(mapSize.Z + 200, 500))
+	zone.CFrame = CFrame.new(mapCFrame.Position.X, mapCFrame.Position.Y - mapSize.Y / 2 - 24, mapCFrame.Position.Z)
+	zone.Parent = map
+	CollectionService:AddTag(zone, "RingoutZone")
+end
+
 function Ringout:Init()
 	for _, instance in ipairs(CollectionService:GetTagged("RingoutZone")) do
 		bindZone(instance)
 	end
 
 	CollectionService:GetInstanceAddedSignal("RingoutZone"):Connect(bindZone)
+
+	local map = workspace:FindFirstChild("Map")
+	if map then
+		ensureFallbackZone(map)
+	end
+	workspace.ChildAdded:Connect(function(child)
+		if child.Name == "Map" then
+			task.defer(ensureFallbackZone, child)
+		end
+	end)
 end
 
 return Ringout

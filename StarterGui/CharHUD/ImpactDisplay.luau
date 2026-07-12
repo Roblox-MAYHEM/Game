@@ -22,7 +22,7 @@ local function pipText(character: Model): string
 end
 
 local function connectImpact(character: Model, trove, update)
-	for _, attribute in ipairs({ "Impact", "ImpactPrimed", "ImpactPips", "ImpactProtected" }) do
+	for _, attribute in ipairs({ "Impact", "ImpactPrimed", "ImpactPips", "ImpactProtected", "Dead" }) do
 		trove:Connect(character:GetAttributeChangedSignal(attribute), update)
 	end
 	update()
@@ -63,8 +63,10 @@ local function bindLocalMeter(ui: ScreenGui, trove)
 		connectImpact(character, characterTrove, function()
 			local impact = character:GetAttribute("Impact") or 0
 			local primed = character:GetAttribute("ImpactPrimed") == true
+			local protected = character:GetAttribute("ImpactProtected") == true
 			fill.Size = UDim2.new(math.clamp(impact / 100, 0, 1), 0, 1, 0)
 			fill.BackgroundColor3 = impactColor(impact, primed)
+			fill.BackgroundTransparency = if protected then 0.35 else 0
 			count.Text = tostring(math.round(impact))
 			pips.Text = pipText(character)
 		end)
@@ -100,6 +102,13 @@ local function createOverheadMeter(character: Model, trove)
 	background.BorderSizePixel = 0
 	background.ClipsDescendants = true
 	background.Parent = billboard
+
+	local teamAccent = Instance.new("UIStroke")
+	local characterPlayer = Players:GetPlayerFromCharacter(character)
+	teamAccent.Color = if characterPlayer and characterPlayer.Team then characterPlayer.Team.TeamColor.Color else Color3.new(1, 1, 1)
+	teamAccent.Thickness = 1.5
+	teamAccent.Transparency = 0.15
+	teamAccent.Parent = background
 
 	local corner = Instance.new("UICorner")
 	corner.CornerRadius = UDim.new(1, 0)
@@ -151,8 +160,10 @@ local function createOverheadMeter(character: Model, trove)
 	connectImpact(character, trove, function()
 		local impact = character:GetAttribute("Impact") or 0
 		local primed = character:GetAttribute("ImpactPrimed") == true
+		local protected = character:GetAttribute("ImpactProtected") == true
 		fill.Size = UDim2.new(math.clamp(impact / 100, 0, 1), 0, 1, 0)
 		fill.BackgroundColor3 = impactColor(impact, primed)
+		fill.BackgroundTransparency = if protected then 0.35 else 0
 		count.Text = tostring(math.round(impact))
 		pips.Text = pipText(character)
 		highlight.Enabled = primed
