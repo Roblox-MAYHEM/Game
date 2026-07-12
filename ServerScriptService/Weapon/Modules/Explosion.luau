@@ -12,6 +12,7 @@ local Remotes		= ReplicatedStorage.Events
 local Modules		= script.Parent
 
 local DamageHandler = require(Modules.DamageHandler)
+local ImpactService = require(Modules.ImpactService)
 local Knockback = require(Modules.Knockback)
 
 local OverlapParam = OverlapParams.new()
@@ -95,10 +96,20 @@ return function(hitPosition : Vector3, Sender : Player, ExplosionInfo, IgnoreHum
 			local t = hitDist / ExplosionInfo.RADIUS
 			local magnitude = math.lerp(ExplosionInfo.IMPULSE_MAX, ExplosionInfo.IMPULSE_MIN, t)
 
-			Knockback(Character, rawDirection, {
-				IMPULSE = magnitude,
-				YMAX = ExplosionInfo.Y_MAX,
-			})
+			if HitPlr == Sender or not ExplosionInfo.IMPACT_MAX then
+				Knockback(Character, rawDirection, {
+					IMPULSE = magnitude,
+					YMAX = ExplosionInfo.Y_MAX,
+				})
+			else
+				local impactPower = math.lerp(ExplosionInfo.IMPACT_MAX, ExplosionInfo.IMPACT_MIN, t)
+				ImpactService.ApplyHit(Character, Sender, {
+					Power = impactPower,
+					Direction = rawDirection,
+					FinisherMultiplier = ExplosionInfo.FINISHER_MULTIPLIER,
+					Source = "Explosion",
+				})
+			end
 
 			-- Apply damage
 			DamageHandler.DamageHumanoid(Humanoid, Sender, Damage, false)

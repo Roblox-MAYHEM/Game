@@ -47,6 +47,13 @@ return {
 				[30] = 20,
 				[100] = 10,
 			},
+			IMPACT_TABLE = {
+				[10] = 8,
+				[30] = 6,
+				[100] = 4,
+			},
+			FINISHER_MULTIPLIER = 0.9,
+			FINISHER_Y = 6,
 
 			KICK 				= Vector3.new(1,2,0), --OOMPH that the gun "feels" instead of the player
 			RECOIL 				= Vector3.new(20,0,0),
@@ -260,6 +267,9 @@ return {
 			Y_MAX	= 80,
 			MAX_DMG 	= 90,
 			MIN_DMG 	= 35,
+			IMPACT_MAX = 20,
+			IMPACT_MIN = 10,
+			FINISHER_MULTIPLIER = 1.1,
 		},
 		["Reload"] = {
 			CAN_CANCEL = true,
@@ -469,6 +479,9 @@ return {
 		},
 		["Lunge"] = {
 			DMG = 60,
+			IMPACT_POWER = 14,
+			FINISHER_MULTIPLIER = 0.85,
+			FINISHER_Y = 18,
 
 			ACTIVE_TIME = .2,	
 			OPEN_TIME = .1,
@@ -582,10 +595,9 @@ return {
 			TIME = .6,
 			COOLDOWN = .6,
 			DMG = 10,
-			KNOCKBACK_FORCE = 60,
-			KNOCKBACK_Y = 18,
-			KNOCKBACK_YMAX = 28,
-			KNOCKBACK_DURATION = 0.35,
+			IMPACT_POWER = 16,
+			FINISHER_MULTIPLIER = 1.25,
+			FINISHER_Y = 16,
 			WINDOW = 3,
 			RANGE = 50,
 			ARC = 160,
@@ -600,19 +612,15 @@ return {
 		},
 		["Special"] = {
 			BASE_DMG = 80,
+			BASE_IMPACT = 24,
+			IMPACT_CHARGE_MULT = 0.1,
+			FINISHER_MULTIPLIER = 1.5,
+			FINISHER_Y = 20,
 			DURATION = 1,
 			COOLDOWN = 5, --1.5
 			WIND_MULT = 0.5,
 			TIME = 2,
 			HIT_TIME = 0.75,
-			KNOCKBACK = true,
-			KNOCKBACK_FORCE = 95,
-			KNOCKBACK_CHARGE_MULT = 0.6,
-			KNOCKBACK_Y = 24,
-			KNOCKBACK_YMAX = 32,
-			KNOCKBACK_DURATION = 0.45,
-			DAZE_DURATION = 1.0,
-			WALL_SPEED_MIN = 24,
 		}
 	},
 

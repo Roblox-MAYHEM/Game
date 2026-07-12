@@ -14,8 +14,6 @@ local DamageHandler = require(Modules.DamageHandler)
 local ApplyExplosion	= require(Modules.Explosion)
 local ProjectileCaster = require(Modules.ProjectileCaster)
 
-local Knockback = require(Modules.Knockback)
-
 local BaseWeapon = require(WeaponSystem.BaseWeapon)
 
 local Weapon = setmetatable({}, {__index = BaseWeapon})
@@ -42,15 +40,11 @@ local function init(self)
 			local hit = result.Instance
 			local humanoid = hit and hit.Parent:FindFirstChildOfClass("Humanoid")
 
+			ApplyExplosion(position, owner, ExplosionInfo)
+
 			if humanoid then
 				DamageHandler.DamageHumanoid(humanoid, owner, ShootInfo.PROJ_DMG, false)
-				Knockback(humanoid.Parent, vel.Unit, {
-					IMPULSE = vel.Magnitude,
-					YMAX = math.huge
-				})
 			end
-
-			ApplyExplosion(position, owner, ExplosionInfo)
 		end,
 	}, self.Projectile)
 end

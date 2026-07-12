@@ -15,6 +15,7 @@ local WeaponSystem = script.Parent.Parent
 local Modules = WeaponSystem.Modules
 
 local DamageHandler = require(WeaponSystem.Modules.DamageHandler)
+local ImpactService = require(WeaponSystem.Modules.ImpactService)
 local ShapecastHitbox = require(ReplicatedStorage.Packages.ShapecastHitbox)
 
 local MeleeValidator = require(Modules.MeleeValidator)
@@ -61,8 +62,21 @@ function Weapon:ProcessHit(targetCharacter)
 
 	local humanoid = targetCharacter:FindFirstChildOfClass("Humanoid")
 	if humanoid then
+		local attackerRoot = self.Character:FindFirstChild("HumanoidRootPart")
+		local targetRoot = targetCharacter:FindFirstChild("HumanoidRootPart")
+		local direction = attackerRoot and targetRoot and (targetRoot.Position - attackerRoot.Position) or Vector3.zAxis
+
+		ImpactService.ApplyHit(targetCharacter, self.Player, {
+			Power = self.LungeInfo.IMPACT_POWER,
+			Direction = direction,
+			FinisherMultiplier = self.LungeInfo.FINISHER_MULTIPLIER,
+			UpwardVelocity = self.LungeInfo.FINISHER_Y,
+			Source = self.Name,
+		})
 		DamageHandler.DamageHumanoid(humanoid, self.Player, self.LungeInfo.DMG, false)
 	end
+
+	return true
 end
 
 function Weapon:Equip()

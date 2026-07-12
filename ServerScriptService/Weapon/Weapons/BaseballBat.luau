@@ -2,8 +2,8 @@ local WeaponSystem = script.Parent.Parent
 local Modules = WeaponSystem.Modules
 
 local DamageHandler = require(Modules.DamageHandler)
+local ImpactService = require(Modules.ImpactService)
 local MeleeValidator = require(Modules.MeleeValidator)
-local ApplyKnockback = require(Modules.Knockback)
 local BaseWeapon = require(WeaponSystem.BaseWeapon)
 
 local Weapon = setmetatable({}, {__index = BaseWeapon})
@@ -53,16 +53,15 @@ function Weapon:_GetHitContext(targetCharacter: Model)
 	local isSpecial = attack and attack.IsSpecial == true and time() <= attack.EndTime
 	local charge = isSpecial and attack.Charge or 0
 	local damage = self.AttackInfo.DMG
-	local knockback = self.AttackInfo
+	local impactPower = self.AttackInfo.IMPACT_POWER
+	local finisherMultiplier = self.AttackInfo.FINISHER_MULTIPLIER
+	local finisherY = self.AttackInfo.FINISHER_Y
 
 	if isSpecial then
 		damage = (self.SpecialInfo.BASE_DMG or damage) + charge * (self.SpecialInfo.WIND_MULT or 0)
-		knockback = self.SpecialInfo
-	end
-
-	local force = knockback.KNOCKBACK_FORCE or self.AttackInfo.KNOCKBACK_FORCE or 0
-	if isSpecial then
-		force += charge * (self.SpecialInfo.KNOCKBACK_CHARGE_MULT or 0)
+		impactPower = (self.SpecialInfo.BASE_IMPACT or impactPower) + charge * (self.SpecialInfo.IMPACT_CHARGE_MULT or 0)
+		finisherMultiplier = self.SpecialInfo.FINISHER_MULTIPLIER or finisherMultiplier
+		finisherY = self.SpecialInfo.FINISHER_Y or finisherY
 	end
 
 	local attackerRoot = rootOf(self.Character)
@@ -70,15 +69,12 @@ function Weapon:_GetHitContext(targetCharacter: Model)
 	local direction = attackerRoot and targetRoot and (targetRoot.Position - attackerRoot.Position) or Vector3.zAxis
 
 	return damage, direction, {
-		FORCE = force,
-		Y = knockback.KNOCKBACK_Y or self.AttackInfo.KNOCKBACK_Y,
-		YMAX = knockback.KNOCKBACK_YMAX or self.AttackInfo.KNOCKBACK_YMAX,
-		DURATION = knockback.KNOCKBACK_DURATION or self.AttackInfo.KNOCKBACK_DURATION,
-		FLAT = true,
-		WALL_DAZE = isSpecial,
-		DAZE_DURATION = self.SpecialInfo.DAZE_DURATION,
-		WALL_SPEED_MIN = self.SpecialInfo.WALL_SPEED_MIN,
-		SOURCE = isSpecial and "BaseballBatSpecial" or "BaseballBat",
+		Power = impactPower,
+		Direction = direction,
+		FinisherMultiplier = finisherMultiplier,
+		UpwardVelocity = finisherY,
+		Flat = true,
+		Source = isSpecial and "BaseballBatSpecial" or "BaseballBat",
 	}
 end
 
@@ -89,9 +85,9 @@ function Weapon:ProcessHit(targetCharacter: Model)
 	local humanoid = targetCharacter:FindFirstChildOfClass("Humanoid")
 	if not humanoid then return false end
 
-	local damage, direction, knockbackParams = self:_GetHitContext(targetCharacter)
+	local damage, _direction, impactHit = self:_GetHitContext(targetCharacter)
+	ImpactService.ApplyHit(targetCharacter, self.Player, impactHit)
 	DamageHandler.DamageHumanoid(humanoid, self.Player, damage, false)
-	ApplyKnockback(targetCharacter, direction, knockbackParams)
 
 	return true
 end
