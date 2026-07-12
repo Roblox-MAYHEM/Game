@@ -14,7 +14,8 @@ local Config = {
 	DecayPerSecond = 6,
 	EscapedImpact = 70,
 	ConsumedImpact = 40,
-	PushPerPower = 0.55,
+	PushPerPower = 1.5,
+	PushDuration = 0.14,
 	MaxPushGrowth = 1.25,
 	FinisherBaseSpeed = 70,
 	FinisherPowerScale = 1.25,
@@ -111,6 +112,7 @@ local function applyPush(character: Model, state: ImpactState, hit: ImpactHit)
 
 	Knockback(character, hit.Direction.Unit, {
 		FORCE = speed,
+		DURATION = Config.PushDuration,
 		MODE = "Push",
 	})
 end

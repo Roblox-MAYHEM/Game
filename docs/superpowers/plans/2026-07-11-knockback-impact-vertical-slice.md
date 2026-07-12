@@ -129,7 +129,7 @@ Extend `KnockbackParams` with `MODE`. Forward it as `packet.Mode`. Keep existing
 
 - [ ] **Step 2: Apply ordinary push without entering movement state**
 
-In `Movement:ApplyKnockback`, when `packet.Mode == "Push"`, apply delta velocity/impulse directly to `HumanoidRootPart` and return. Do not change state, zero input, alter friction, or block weapons.
+In `Movement:ApplyKnockback`, when `packet.Mode == "Push"`, apply velocity directly to `HumanoidRootPart` and return without changing state or blocking input/weapons. Briefly set ground-controller friction to zero so its normal movement target does not erase the impulse immediately, then restore normal friction automatically.
 
 - [ ] **Step 3: Make finisher commitment short**
 

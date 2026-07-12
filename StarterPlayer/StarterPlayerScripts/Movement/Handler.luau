@@ -161,6 +161,8 @@ function Movement:Init(props)
 	self.BaseMass = hrp.Mass
 
 	self.Groundtime = 0
+	self.PushFrictionUntil = 0
+	self.PushFrictionActive = false
 	self.GroundController.FrictionWeight = 100
 	self.GroundController.Friction = self.BaseFriction
 	self.GroundController.GroundOffset = self.BaseOffset
@@ -209,10 +211,17 @@ function Movement:ApplyKnockback(packet)
 
 	if data.Velocity.Magnitude <= 0.001 then return end
 	if mode == "Push" then
+		self.PushFrictionUntil = math.max(self.PushFrictionUntil or 0, time() + (data.Duration or 0.14))
+		if self:IsGrounded() then
+			self.GroundController.Friction = 0
+			self.PushFrictionActive = true
+		end
 		self.HRP:ApplyImpulse(data.Velocity * self.HRP.AssemblyMass)
 		return
 	end
 
+	self.PushFrictionUntil = 0
+	self.PushFrictionActive = false
 	self.StateMachine:Change("Knockback", data)
 end
 
@@ -240,6 +249,15 @@ function Movement:Update(dt)
 
 	local current = self.States[self.state]
 	if current then current:OnUpdate(dt) end
+
+	if time() < (self.PushFrictionUntil or 0) and self:IsGrounded() then
+		self.GroundController.Friction = 0
+		self.PushFrictionActive = true
+	elseif self.PushFrictionActive and self.state ~= "Knockback" then
+		local running = self.States.Running and self.States.Running.Config
+		self.GroundController.Friction = (running and running.Friction) or self.BaseFriction
+		self.PushFrictionActive = false
+	end
 
 	self.Runtime:UpdateTilt()
 	self.Runtime:UpdateSpread()
