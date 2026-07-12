@@ -59,9 +59,9 @@ function Frame:Update(_dt: number)
 
 	rays.Ground = self.Cast:GroundCheck()
 
-	if fsm.state == "Running" and frame.WorldWishDir ~= Vector3.zero then
+	if frame.Grounded and frame.WorldWishDir ~= Vector3.zero then
 		rays.FrontWall = self.Cast:FrontCheck()
-	elseif fsm.state == "Air" or fsm.state == "WallRunning" then
+	else
 		rays.LeftWall = self.Cast:LeftSideCheck()
 		rays.RightWall = self.Cast:RightSideCheck()
 	end
@@ -77,16 +77,13 @@ function Frame:Update(_dt: number)
 		frame.GroundNormal = ground.Normal
 		frame.SlopeAngle = math.deg(math.acos(math.clamp(ground.Normal:Dot(up), -1, 1)))
 		frame.SlopeDownDir = downhill.Magnitude > 0.001 and downhill.Unit or Vector3.zero
-		frame.SlopeSliding = frame.SlopeAngle >= (fsm.Config.SlopeSlideAngle or 43) and frame.SlopeDownDir ~= Vector3.zero
+		frame.SlopeSliding = frame.SlopeAngle >= (fsm.Config.Movement.SlopeSlideAngle or 43) and frame.SlopeDownDir ~= Vector3.zero
 
 		fsm.GroundSensor.SensedPart = ground.Instance
 		fsm.GroundSensor.HitNormal = ground.Normal
 		fsm.GroundSensor.HitFrame = CFrame.new(ground.Position)
-		fsm.CM.ActiveController = fsm.GroundController
-
 		frame.LastGroundedAt = time()
 
-		if frame.JustLanded then fsm.Landed:Fire() end
 	else
 		frame.GroundNormal = up
 		frame.SlopeAngle = 0
@@ -94,7 +91,6 @@ function Frame:Update(_dt: number)
 		frame.SlopeSliding = false
 
 		fsm.GroundSensor.SensedPart = nil
-		fsm.CM.ActiveController = fsm.AirController
 	end
 end
 

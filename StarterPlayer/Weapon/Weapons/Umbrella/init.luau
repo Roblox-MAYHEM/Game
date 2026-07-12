@@ -205,16 +205,14 @@ end
 function Weapon:BeginGlide()
 	if self.States.Lunging then return end
 	if Cooldown.get("Glide") then return end
-	if not self.Movement.States.Air then return end
+	if self.Movement:IsGrounded() then return end
 
 	Cooldown.set("Glide", self.GlideInfo.COOLDOWN)
 
 	self.States.Gliding = true
 	self._glideTargetK  = self.GlideInfo.K_OPEN
 
-	self._glideRoot:ApplyImpulse(
-		Vector3.new(0, self._glideRoot.AssemblyMass * self.GlideInfo.POP_SPEED, 0)
-	)
+	self.Movement:ApplyImpulse(Vector3.yAxis, self.GlideInfo.POP_SPEED)
 
 	self._glideConnection = RunService.RenderStepped:Connect(function(dt)
 		self:_glideStep(dt)
@@ -276,7 +274,11 @@ function Weapon:Lunge()
 	self.Sounds.Lunge:Play()
 	self.Effects:Play("Lunge")
 
-	self.Movement:HandleStateChange("Lunging")
+	self.Movement:StartLunge(workspace.CurrentCamera.CFrame.LookVector, {
+		Duration = self.LungeInfo.ACTIVE_TIME + self.LungeInfo.OPEN_TIME,
+		Strength = self.LungeInfo.FORWARD_VELOCITY,
+		SteeringScale = 0.1,
+	})
 
 	local cnx
 	cnx = Bindables.EndLunge.Event:Once(function()
@@ -297,7 +299,9 @@ function Weapon:CancelLunge()
 
 	self.States.Lunging = false
 	self.Animations.Lunge:Stop()
-	self.Movement:HandleStateChange("Air")
+	if self.Movement.ActiveAction and self.Movement.ActiveAction.Name == "Lunge" then
+		self.Movement:StopAction("Weapon cancelled")
+	end
 	self.Hitbox:HitStop()
 
 	self.Effects:Play("CancelLunge")

@@ -28,7 +28,9 @@ function Locomotion:Update(dt: number)
 
 		local counterSteering = wish ~= Vector3.zero and speed > 0.1 and velocity.Unit:Dot(wish) < 0
 		local fast = math.clamp((speed - running.MoveSpeed) / math.max(running.MomentumRange, 0.01), 0, 1)
-		ground.Friction = if counterSteering
+		ground.Friction = if time() < (movement.PushGripUntil or 0)
+			then running.FastFriction
+			elseif counterSteering
 			then running.CounterFriction
 			else math.lerp(running.Friction, running.FastFriction, fast)
 
