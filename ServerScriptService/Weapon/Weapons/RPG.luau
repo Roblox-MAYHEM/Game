@@ -12,7 +12,6 @@ local Modules			= WeaponSystem.Modules
 
 local DamageHandler		= require(Modules.DamageHandler)
 local ApplyExplosion	= require(Modules.Explosion)
-local Knockback = require(Modules.Knockback)
 local ProjectileCaster = require(Modules.ProjectileCaster)
 
 local BaseWeapon = require(WeaponSystem.BaseWeapon)
@@ -41,14 +40,11 @@ local function init(self)
 			local hit = result.Instance
 			local humanoid = hit and hit.Parent:FindFirstChildOfClass("Humanoid")
 
+			ApplyExplosion(position, owner, ExplosionInfo)
+
 			if humanoid then
 				DamageHandler.DamageHumanoid(humanoid, owner, ShootInfo.PROJ_DMG, false)
-				Knockback(humanoid.Parent, vel.Unit, {
-					FORCE = vel.Magnitude*.3
-				})
 			end
-
-			ApplyExplosion(position, owner, ExplosionInfo)
 		end,
 	}, self.Projectile)
 end

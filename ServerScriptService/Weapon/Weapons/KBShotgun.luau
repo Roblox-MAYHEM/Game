@@ -12,8 +12,8 @@ local Modules			= WeaponSystem.Modules
 
 local DamageHandler = require(Modules.DamageHandler)
 local DamageFalloff = require(Modules.DamageFalloff)
+local ImpactService = require(Modules.ImpactService)
 local ProjectileValidator = require(Modules.ProjectileValidator)
-local ApplyKnockback = require(Modules.Knockback)
 
 local BaseWeapon = require(WeaponSystem.BaseWeapon)
 
@@ -36,8 +36,6 @@ function Weapon.new(WeaponModel : Model, player : Player)
 	self.ShootInfo = self.Config.Shoot
 
 	self.getDamageFalloff = DamageFalloff(self.ShootInfo.DMG_TABLE)
-
-	self.totalKnockback = 0
 
 	self.ProjectileValidator = ProjectileValidator.new(self.Character, {
 		ShootPart = self.WeaponModel:FindFirstChild("Shoot", true),
@@ -65,7 +63,6 @@ function Weapon:Shoot(packet)
 
 	self.Projectile.ApproveFire(self.Player, approvedPacket or packet)
 
-	self.totalKnockback = 0
 end
 
 function Weapon:ProcessHit(shotId: string, HitHum: Humanoid, HitPart: BasePart, HitPos: Vector3, time: number, velocity)
@@ -77,13 +74,17 @@ function Weapon:ProcessHit(shotId: string, HitHum: Humanoid, HitPart: BasePart, 
 
 	local distance = hit and hit.DistanceAlong or (HitPos - HRP.Position).Magnitude
 	local damage = self.getDamageFalloff(distance)
+	local targetCharacter = HitHum.Parent
+	local targetRoot = targetCharacter and targetCharacter:FindFirstChild("HumanoidRootPart")
+	local direction = targetRoot and (targetRoot.Position - HRP.Position) or (HitPos - HRP.Position)
 
+	ImpactService.ApplyHit(targetCharacter, self.Player, {
+		Power = self.ShootInfo.IMPACT_POWER,
+		Direction = direction,
+		FinisherMultiplier = self.ShootInfo.FINISHER_MULTIPLIER,
+		UpwardVelocity = self.ShootInfo.FINISHER_Y,
+	})
 	DamageHandler.DamageHumanoid(HitHum, self.Player, damage, false)
-
-	local knockback = math.min(self.ShootInfo.BULLET_KB_TOTAL-self.totalKnockback, self.ShootInfo.BULLET_KB)
-	self.totalKnockback += knockback
-
-	ApplyKnockback(HitHum.Parent, velocity.Unit, {FORCE = knockback})
 end
 
 return Weapon

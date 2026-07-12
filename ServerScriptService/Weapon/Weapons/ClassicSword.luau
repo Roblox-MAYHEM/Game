@@ -2,8 +2,8 @@ local WeaponSystem = script.Parent.Parent
 local Modules = WeaponSystem.Modules
 
 local DamageHandler = require(Modules.DamageHandler)
+local ImpactService = require(Modules.ImpactService)
 local MeleeValidator = require(Modules.MeleeValidator)
-local ApplyKnockback = require(Modules.Knockback)
 local BaseWeapon = require(WeaponSystem.BaseWeapon)
 
 local Weapon = setmetatable({}, { __index = BaseWeapon })
@@ -69,19 +69,21 @@ function Weapon:ProcessHit(targetCharacter: Model)
 	local humanoid = targetCharacter:FindFirstChildOfClass("Humanoid")
 	if not humanoid then return false end
 
-	DamageHandler.DamageHumanoid(humanoid, self.Player, info.DMG, false)
-
-	if self.CurrentMode == "Lunge" then
-		local attackerRoot = rootOf(self.Character)
-		local targetRoot = rootOf(targetCharacter)
-		local direction = attackerRoot and targetRoot and (targetRoot.Position - attackerRoot.Position) or Vector3.zAxis
-		ApplyKnockback(targetCharacter, direction, {
-			FORCE = info.KNOCKBACK_FORCE,
-			Y = info.KNOCKBACK_Y,
-			DURATION = info.KNOCKBACK_DURATION,
-			FLAT = true,
-		})
+	local attackerRoot = rootOf(self.Character)
+	local targetRoot = rootOf(targetCharacter)
+	local rawDirection = attackerRoot and targetRoot and (targetRoot.Position - attackerRoot.Position) or Vector3.zAxis
+	local direction = Vector3.new(rawDirection.X, 0, rawDirection.Z)
+	if direction.Magnitude <= 0.001 then
+		direction = attackerRoot and attackerRoot.CFrame.LookVector or Vector3.zAxis
 	end
+
+	ImpactService.ApplyHit(targetCharacter, self.Player, {
+		Power = info.IMPACT_POWER,
+		Direction = direction,
+		FinisherMultiplier = info.FINISHER_MULTIPLIER,
+		UpwardVelocity = info.FINISHER_Y,
+	})
+	DamageHandler.DamageHumanoid(humanoid, self.Player, info.DMG, false)
 
 	return true
 end

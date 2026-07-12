@@ -103,6 +103,14 @@ return {
 				[50] = 15,  
 				[75] = 5,
 			},
+			IMPACT_TABLE = {
+				[0] = 2.5,
+				[15] = 2.5,
+				[50] = 1.5,
+				[75] = 0.75,
+			},
+			FINISHER_MULTIPLIER = 1.15,
+			FINISHER_Y = 8,
 
 			KICK 				= Vector3.new(10,15,0), 
 			RECOIL 				= Vector3.new(75,0,0),
@@ -145,6 +153,8 @@ return {
 			MAX_MAG 			= 100,
 			FIRE_DELAY			= 0.3,
 			AUTO_FIRE = false,
+			PELLETS = 8,
+			SPREAD = 7,
 
 
 			DMG_TABLE = {
@@ -153,6 +163,14 @@ return {
 				[20] = 9, 
 				[30] = 0,
 			},
+			IMPACT_TABLE = {
+				[0] = 2,
+				[15] = 2.25,
+				[20] = 2.25,
+				[30] = 0.75,
+			},
+			FINISHER_MULTIPLIER = 1.05,
+			FINISHER_Y = 7,
 
 			KICK = Vector3.new(6,7,0),
 			RECOIL = Vector3.new(35,0,25),
@@ -192,14 +210,17 @@ return {
 			PROJ_NAME 	= "Bullet",
 			PROJ_RANGE 	= 50,
 
-			BULLET_KB			= 20, --Strength of impulse applied to enemies hit with bullet
-			BULLET_KB_TOTAL		= 40,
+			IMPACT_POWER = 3,
+			FINISHER_MULTIPLIER = 1.15,
+			FINISHER_Y = 9,
 
 			FIRE_RATE 			= 0.5,
 			MAX_AMMO 			= 4,
 			MAX_MAG 			= 100,
 			FIRE_DELAY			= 0.3,
 			AUTO_FIRE = false,
+			PELLETS = 10,
+			SPREAD = 10,
 
 
 			DMG_TABLE = {
@@ -324,6 +345,10 @@ return {
 			Y_MAX	= 60,
 			MAX_DMG 	= 50,
 			MIN_DMG 	= 15,
+			IMPACT_MAX = 18,
+			IMPACT_MIN = 8,
+			FINISHER_MULTIPLIER = 1.15,
+			FINISHER_Y = 12,
 		},
 		["Reload"] = {
 			CAN_CANCEL = false,
@@ -375,6 +400,10 @@ return {
 			Y_MAX	= 60,
 			MAX_DMG 	= 50,
 			MIN_DMG 	= 15,
+			IMPACT_MAX = 16,
+			IMPACT_MIN = 7,
+			FINISHER_MULTIPLIER = 1.1,
+			FINISHER_Y = 10,
 		},
 		["Reload"] = {
 			CAN_CANCEL = true,
@@ -510,6 +539,9 @@ return {
 		},
 		["Attack"] = {
 			DMG = 30,
+			IMPACT_POWER = 14,
+			FINISHER_MULTIPLIER = 1.15,
+			FINISHER_Y = 8,
 
 			TIME = .8,
 			RANGE = 40,
@@ -536,6 +568,9 @@ return {
 		},
 		["Attack"] = {
 			DMG = 10,
+			IMPACT_POWER = 9,
+			FINISHER_MULTIPLIER = 1,
+			FINISHER_Y = 5,
 
 			TIME = .15,
 			RANGE = 10,
@@ -643,6 +678,9 @@ return {
 			ARC = 140,
 			HIT_DEBOUNCE = 0.08,
 			LOS = true,
+			IMPACT_POWER = 10,
+			FINISHER_MULTIPLIER = 1,
+			FINISHER_Y = 6,
 		},
 		["Lunge"] = {
 			TIME = 0.8,
@@ -658,9 +696,9 @@ return {
 			FLOAT_VELOCITY = Vector3.new(0, 16, 0),
 			FORWARD_VELOCITY = 26,
 			GRIP_OUT = CFrame.new(0, 0, -0.75),
-			KNOCKBACK_FORCE = 35,
-			KNOCKBACK_Y = 8,
-			KNOCKBACK_DURATION = 0.2,
+			IMPACT_POWER = 18,
+			FINISHER_MULTIPLIER = 1.15,
+			FINISHER_Y = 10,
 		},
 	},
 
@@ -689,10 +727,9 @@ return {
 			ARC = 170,
 			HIT_DEBOUNCE = 0.2,
 			LOS = true,
-			KNOCKBACK_FORCE = 85,
-			KNOCKBACK_Y = 18,
-			KNOCKBACK_YMAX = 28,
-			KNOCKBACK_DURATION = 0.35,
+			IMPACT_POWER = 18,
+			FINISHER_MULTIPLIER = 1.2,
+			FINISHER_Y = 12,
 			SWINGS = {
 				{
 					ANIM = "Swing1",
@@ -700,7 +737,8 @@ return {
 					HIT_DELAY = 0.18,
 					HIT_TIME = 0.26,
 					DMG = 60,
-					KNOCKBACK_FORCE = 75,
+					IMPACT_POWER = 15,
+					FINISHER_MULTIPLIER = 1.1,
 				},
 				{
 					ANIM = "Swing2",
@@ -708,7 +746,8 @@ return {
 					HIT_DELAY = 0.2,
 					HIT_TIME = 0.28,
 					DMG = 70,
-					KNOCKBACK_FORCE = 90,
+					IMPACT_POWER = 18,
+					FINISHER_MULTIPLIER = 1.2,
 				},
 				{
 					ANIM = "Swing3",
@@ -716,10 +755,9 @@ return {
 					HIT_DELAY = 0.32,
 					HIT_TIME = 0.42,
 					DMG = 105,
-					KNOCKBACK_FORCE = 120,
-					KNOCKBACK_Y = 28,
-					KNOCKBACK_YMAX = 38,
-					KNOCKBACK_DURATION = 0.45,
+					IMPACT_POWER = 26,
+					FINISHER_MULTIPLIER = 1.4,
+					FINISHER_Y = 18,
 					SPECIAL = true,
 				},
 			},
@@ -760,6 +798,13 @@ return {
 				[50] = 40,
 				[100] = 20,
 			},
+			IMPACT_TABLE = {
+				[0] = 14,
+				[50] = 11,
+				[100] = 7,
+			},
+			FINISHER_MULTIPLIER = 1.15,
+			FINISHER_Y = 8,
 
 			KICK 				= Vector3.new(2,2,0), --OOMPH that the gun "feels" instead of the player
 			RECOIL 				= Vector3.new(10,0,-100),

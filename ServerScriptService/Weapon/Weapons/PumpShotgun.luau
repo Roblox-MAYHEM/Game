@@ -12,6 +12,7 @@ local Modules			= WeaponSystem.Modules
 
 local DamageHandler = require(Modules.DamageHandler)
 local DamageFalloff = require(Modules.DamageFalloff)
+local ImpactService = require(Modules.ImpactService)
 local ProjectileValidator = require(Modules.ProjectileValidator)
 
 local BaseWeapon = require(WeaponSystem.BaseWeapon)
@@ -21,6 +22,7 @@ Weapon.__index = Weapon
 
 local function init(self)
 	self.getDamageFalloff = DamageFalloff(self.ShootInfo.DMG_TABLE)
+	self.getImpactFalloff = DamageFalloff(self.ShootInfo.IMPACT_TABLE)
 
 	self.ProjectileValidator = ProjectileValidator.new(self.Character, {
 		ShootPart = self.WeaponModel:FindFirstChild("Shoot", true),
@@ -72,7 +74,16 @@ function Weapon:ProcessHit(shotId: string, HitHum: Humanoid, HitPart: BasePart, 
 
 	local distance = hit and hit.DistanceAlong or (HitPos - HRP.Position).Magnitude
 	local damage = self.getDamageFalloff(distance)
+	local targetCharacter = HitHum.Parent
+	local targetRoot = targetCharacter and targetCharacter:FindFirstChild("HumanoidRootPart")
+	local direction = targetRoot and (targetRoot.Position - HRP.Position) or (HitPos - HRP.Position)
 
+	ImpactService.ApplyHit(targetCharacter, self.Player, {
+		Power = self.getImpactFalloff(distance),
+		Direction = direction,
+		FinisherMultiplier = self.ShootInfo.FINISHER_MULTIPLIER,
+		UpwardVelocity = self.ShootInfo.FINISHER_Y,
+	})
 	DamageHandler.DamageHumanoid(HitHum, self.Player, damage, false)
 end
 

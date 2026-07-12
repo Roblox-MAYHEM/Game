@@ -2,6 +2,7 @@ local WeaponSystem = script.Parent.Parent
 local Modules = WeaponSystem.Modules
 
 local DamageHandler = require(Modules.DamageHandler)
+local ImpactService = require(Modules.ImpactService)
 local BaseWeapon = require(WeaponSystem.BaseWeapon)
 
 local MeleeValidator = require(Modules.MeleeValidator)
@@ -51,7 +52,16 @@ function Weapon:ProcessHit(targetChar)
 	local ok, reason = self.AttackValidator:ValidateHit(targetChar)
 	if not ok then return false end
 
-	-- Apply damage
+	local attackerRoot = self.Character and self.Character:FindFirstChild("HumanoidRootPart")
+	local targetRoot = targetChar:FindFirstChild("HumanoidRootPart")
+	local direction = attackerRoot and targetRoot and (targetRoot.Position - attackerRoot.Position) or Vector3.zAxis
+
+	ImpactService.ApplyHit(targetChar, self.Player, {
+		Power = self.AttackInfo.IMPACT_POWER,
+		Direction = direction,
+		FinisherMultiplier = self.AttackInfo.FINISHER_MULTIPLIER,
+		UpwardVelocity = self.AttackInfo.FINISHER_Y,
+	})
 	DamageHandler.DamageHumanoid(humanoid, self.Player, self.AttackInfo.DMG, false)
 
 	return true
