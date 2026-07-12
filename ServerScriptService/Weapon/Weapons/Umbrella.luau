@@ -8,16 +8,12 @@ Modularized for easier reuse and combination.
 ]]
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local ServerStorage = game:GetService("ServerStorage")
-local PhysicsService = game:GetService("PhysicsService")
 
 local WeaponSystem = script.Parent.Parent
 local Modules = WeaponSystem.Modules
 
 local DamageHandler = require(WeaponSystem.Modules.DamageHandler)
 local ImpactService = require(WeaponSystem.Modules.ImpactService)
-local ShapecastHitbox = require(ReplicatedStorage.Packages.ShapecastHitbox)
-
 local MeleeValidator = require(Modules.MeleeValidator)
 
 local BaseWeapon = require(WeaponSystem.BaseWeapon)
@@ -71,7 +67,6 @@ function Weapon:ProcessHit(targetCharacter)
 			Direction = direction,
 			FinisherMultiplier = self.LungeInfo.FINISHER_MULTIPLIER,
 			UpwardVelocity = self.LungeInfo.FINISHER_Y,
-			Source = self.Name,
 		})
 		DamageHandler.DamageHumanoid(humanoid, self.Player, self.LungeInfo.DMG, false)
 	end

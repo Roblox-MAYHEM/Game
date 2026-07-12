@@ -80,7 +80,6 @@ function Weapon:ProcessHit(targetCharacter: Model)
 			Y = info.KNOCKBACK_Y,
 			DURATION = info.KNOCKBACK_DURATION,
 			FLAT = true,
-			SOURCE = "ClassicSwordLunge",
 		})
 	end
 

@@ -31,7 +31,6 @@
 
 ### Modify
 
-- `ServerScriptService/Weapon/Handler.luau` — initialize `ImpactService` once with weapon system.
 - `ServerScriptService/Weapon/Modules/Knockback.luau` — label packets as ordinary push or finisher launch.
 - `StarterPlayer/StarterPlayerScripts/Movement/Handler.luau` — apply ordinary push directly; route finishers to launch state.
 - `StarterPlayer/StarterPlayerScripts/Movement/States/Knockback.luau` — brief committed finisher phase, then end into normal Air movement.
@@ -50,7 +49,6 @@
 **Files:**
 
 - Create: `ServerScriptService/Weapon/Modules/ImpactService.luau`
-- Modify: `ServerScriptService/Weapon/Handler.luau`
 
 **Interface:**
 
@@ -59,14 +57,11 @@ export type ImpactHit = {
 	Power: number,
 	Direction: Vector3,
 	FinisherMultiplier: number?,
-	Flat: boolean?,
 	UpwardVelocity: number?,
-	Source: string?,
 }
 
-ImpactService:Init()
-ImpactService.ApplyHit(targetCharacter: Model, attacker: Player, hit: ImpactHit): boolean
-ImpactService.GetLastAttacker(targetCharacter: Model): Player?
+ImpactService.ApplyHit(targetCharacter: Model, attacker: Player, hit: ImpactHit)
+ImpactService.GetRecentAttacker(targetCharacter: Model): Player?
 ```
 
 **Replicated character attributes:**
@@ -80,7 +75,7 @@ ImpactProtected    visible reason a finisher did not retrigger
 
 - [ ] **Step 1: Create one state table keyed by character**
 
-Store only transient fields needed for play: current Impact, last hit time, Primed expiry, remaining pips, next allowed finisher time, protection expiry, and last attacker. Initialize attributes on every player character and remove state when character leaves.
+Store only transient fields needed for play: current Impact, last hit time, Primed expiry, remaining pips, next allowed finisher time, protection expiry, and last attacker. Create state lazily on first hit and remove it when character leaves; HUD treats missing attributes as zero.
 
 - [ ] **Step 2: Put feel tuning in one local table**
 
@@ -102,14 +97,10 @@ Keep formula inside this function. Do not extract a calculator module.
 
 Heartbeat handles only three timed changes: delayed slow decay, Primed expiry, and protection expiry. Write character attributes only when displayed state changes. Escaping an unused Primed sequence leaves target in danger range; consuming sequence returns target to moderate Impact.
 
-- [ ] **Step 5: Initialize service from weapon handler**
-
-Require `ImpactService` once in `ServerScriptService/Weapon/Handler.luau` and call `ImpactService:Init()` at start of `WeaponSystem:Init`. Keep weapons using direct `require(Modules.ImpactService)` calls; do not inject service through `BaseWeapon`.
-
-- [ ] **Step 6: Commit state foundation**
+- [ ] **Step 5: Commit state foundation**
 
 ```bash
-git add ServerScriptService/Weapon/Modules/ImpactService.luau ServerScriptService/Weapon/Handler.luau
+git add ServerScriptService/Weapon/Modules/ImpactService.luau
 git commit -m "feat: add transient impact combat state"
 ```
 
@@ -175,9 +166,7 @@ ImpactService.ApplyHit(targetCharacter, self.Player, {
 	Power = impactPower,
 	Direction = direction,
 	FinisherMultiplier = finisherMultiplier,
-	Flat = flat,
 	UpwardVelocity = upwardVelocity,
-	Source = self.Name,
 })
 ```
 
@@ -256,7 +245,7 @@ git commit -m "feat: show impact and primed state"
 - Create: `ServerScriptService/Ringout.luau`
 - Optional Studio map change: tag authored void trigger part(s) with `RingoutZone`
 
-**Consumes:** `ImpactService.GetLastAttacker(character)` and existing `DamageHandler.KillHumanoid`.
+**Consumes:** `ImpactService.GetRecentAttacker(character)` and existing `DamageHandler.KillHumanoid`.
 
 - [ ] **Step 1: Bind tagged void zones**
 
@@ -264,7 +253,7 @@ As a top-level ModuleScript, `Ringout.luau` is loaded by existing server Loader.
 
 - [ ] **Step 2: Credit latest meaningful attacker**
 
-Ask `ImpactService.GetLastAttacker(character)`. Kill through existing `DamageHandler.KillHumanoid`; use victim as fallback when no attacker exists. This preserves current `PlayerKilled`, kill feed, leaderboard, ragdoll, death screen, click-to-respawn, and kill-cam path.
+Ask `ImpactService.GetRecentAttacker(character)`. Kill through existing `DamageHandler.KillHumanoid`; use victim as fallback when no attacker exists. This preserves current `PlayerKilled`, kill feed, leaderboard, ragdoll, death screen, click-to-respawn, and kill-cam path.
 
 - [ ] **Step 3: Make current map void explicit**
 

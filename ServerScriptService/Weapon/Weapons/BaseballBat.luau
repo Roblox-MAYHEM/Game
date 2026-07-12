@@ -67,14 +67,13 @@ function Weapon:_GetHitContext(targetCharacter: Model)
 	local attackerRoot = rootOf(self.Character)
 	local targetRoot = rootOf(targetCharacter)
 	local direction = attackerRoot and targetRoot and (targetRoot.Position - attackerRoot.Position) or Vector3.zAxis
+	direction = Vector3.new(direction.X, 0, direction.Z)
 
-	return damage, direction, {
+	return damage, {
 		Power = impactPower,
 		Direction = direction,
 		FinisherMultiplier = finisherMultiplier,
 		UpwardVelocity = finisherY,
-		Flat = true,
-		Source = isSpecial and "BaseballBatSpecial" or "BaseballBat",
 	}
 end
 
@@ -85,7 +84,7 @@ function Weapon:ProcessHit(targetCharacter: Model)
 	local humanoid = targetCharacter:FindFirstChildOfClass("Humanoid")
 	if not humanoid then return false end
 
-	local damage, _direction, impactHit = self:_GetHitContext(targetCharacter)
+	local damage, impactHit = self:_GetHitContext(targetCharacter)
 	ImpactService.ApplyHit(targetCharacter, self.Player, impactHit)
 	DamageHandler.DamageHumanoid(humanoid, self.Player, damage, false)
 

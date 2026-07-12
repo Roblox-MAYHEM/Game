@@ -30,7 +30,7 @@ local function ringOut(part: BasePart)
 		resolvingCharacters[character] = nil
 	end)
 
-	local attacker = ImpactService.GetLastAttacker(character) or victim
+	local attacker = ImpactService.GetRecentAttacker(character) or victim
 	DamageHandler.KillHumanoid(humanoid, attacker, true, attacker)
 end
 

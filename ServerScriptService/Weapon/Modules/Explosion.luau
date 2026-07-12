@@ -107,7 +107,6 @@ return function(hitPosition : Vector3, Sender : Player, ExplosionInfo, IgnoreHum
 					Power = impactPower,
 					Direction = rawDirection,
 					FinisherMultiplier = ExplosionInfo.FINISHER_MULTIPLIER,
-					Source = "Explosion",
 				})
 			end
 

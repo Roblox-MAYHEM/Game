@@ -93,7 +93,6 @@ function Weapon:ProcessHit(targetCharacter: Model)
 		YMAX = info.KNOCKBACK_YMAX or self.AttackInfo.KNOCKBACK_YMAX,
 		DURATION = info.KNOCKBACK_DURATION or self.AttackInfo.KNOCKBACK_DURATION,
 		FLAT = true,
-		SOURCE = if info.SPECIAL then "GreatSwordSpecial" else "GreatSword",
 	})
 
 	return true

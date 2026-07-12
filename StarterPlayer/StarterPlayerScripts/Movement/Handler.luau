@@ -203,7 +203,6 @@ function Movement:ApplyKnockback(packet)
 		data.WallDaze = packet.WallDaze == true
 		data.DazeDuration = numberOrNil(packet.DazeDuration)
 		data.WallSpeedMin = numberOrNil(packet.WallSpeedMin)
-		data.Source = packet.Source
 	else
 		return
 	end

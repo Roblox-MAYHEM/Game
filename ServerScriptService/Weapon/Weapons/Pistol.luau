@@ -65,7 +65,6 @@ function Weapon:Shoot(packet)
 end
 
 function Weapon:ProcessHit(id: number, HitHum: Humanoid, HitPart: BasePart, HitPos: Vector3, time: number, velocity: Vector3?)
-	print("Hit w pistol")
 	local ok, reason, hit = self.ProjectileValidator:ValidateHit(id, HitHum, HitPart, HitPos, time, velocity)
 	if not ok then warn("Rejected hit:", reason) return end
 
@@ -84,7 +83,6 @@ function Weapon:ProcessHit(id: number, HitHum: Humanoid, HitPart: BasePart, HitP
 		Direction = direction,
 		FinisherMultiplier = self.ShootInfo.FINISHER_MULTIPLIER,
 		UpwardVelocity = self.ShootInfo.FINISHER_Y,
-		Source = self.Name,
 	})
 	DamageHandler.DamageHumanoid(HitHum, self.Player, damage, false)
 

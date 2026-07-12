@@ -14,7 +14,6 @@ type KnockbackParams = {
 	WALL_DAZE: boolean?,
 	DAZE_DURATION: number?,
 	WALL_SPEED_MIN: number?,
-	SOURCE: string?,
 }
 
 return function(targetCharacter: Model, direction: Vector3, params: KnockbackParams?)
@@ -53,7 +52,6 @@ return function(targetCharacter: Model, direction: Vector3, params: KnockbackPar
 			WallDaze = params.WALL_DAZE == true,
 			DazeDuration = params.DAZE_DURATION,
 			WallSpeedMin = params.WALL_SPEED_MIN,
-			Source = params.SOURCE,
 		})
 	else
 		root:ApplyImpulse(velocity * root.AssemblyMass)
