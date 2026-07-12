@@ -100,12 +100,13 @@ function Runtime:GetMoveSpeed(defaultSpeed: number, dir: Vector3?, dt: number): 
 	return self.moveSpeed
 end
 
-function Runtime:SetEquipLoad(equipLoad)
+function Runtime:SetWeight(weight)
 	local fsm = self.fsm
 	local p = fsm._basePhysProps
 	if not p or not fsm.HRP or not fsm.BaseMass or not fsm.BaseVolume then return end
 
-	local density = (fsm.BaseMass * equipLoad) / fsm.BaseVolume
+	weight = math.max(tonumber(weight) or 1, 0.1)
+	local density = (fsm.BaseMass * weight) / fsm.BaseVolume
 
 	fsm.HRP.CustomPhysicalProperties = PhysicalProperties.new(
 		density,
@@ -115,7 +116,10 @@ function Runtime:SetEquipLoad(equipLoad)
 		p.ElasticityWeight
 	)
 
-	fsm.EquipLoad = equipLoad
+	fsm.Weight = weight
+	-- Temporary bridge while old locomotion states are removed. Weight is now
+	-- represented by assembly mass only, never by a second speed divisor.
+	fsm.EquipLoad = 1
 end
 
 function Runtime:SetDoubleJumps(doubleJumps)

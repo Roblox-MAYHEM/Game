@@ -340,7 +340,7 @@ function RangedBehavior:_ApplyKnockback()
 		end
 	end
 
-	self.HRP:ApplyImpulse(-dir * force)
+	self.Movement:ApplyImpulse(-dir, force)
 end
 
 function RangedBehavior:_ApplyRecoil()

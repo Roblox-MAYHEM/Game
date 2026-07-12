@@ -49,6 +49,7 @@ local Movement = {
 	Config = MovementConfig.Movement,
 	CurrentSpread = 0,
 	EquipLoad = 1,
+	Weight = 1,
 	Priority = 1,
 }
 
@@ -189,7 +190,14 @@ function Movement:ApplyKnockback(packet)
 	if typeof(packet) == "Vector3" then
 		data.Velocity = packet / math.max(self.HRP.AssemblyMass, 0.001)
 	elseif typeof(packet) == "table" then
-		if typeof(packet.Velocity) == "Vector3" then
+		if typeof(packet.Direction) == "Vector3" and typeof(packet.Strength) == "number" then
+			local before = self.HRP.AssemblyLinearVelocity
+			self:ApplyImpulse(packet.Direction, packet.Strength)
+			data.Velocity = self.HRP.AssemblyLinearVelocity
+			if data.Velocity == before then
+				data.Velocity = before + packet.Direction.Unit * packet.Strength / math.max(self.Weight, 0.1)
+			end
+		elseif typeof(packet.Velocity) == "Vector3" then
 			data.Velocity = packet.Velocity
 		elseif typeof(packet.Impulse) == "Vector3" then
 			data.Velocity = packet.Impulse / math.max(self.HRP.AssemblyMass, 0.001)
@@ -216,7 +224,9 @@ function Movement:ApplyKnockback(packet)
 			self.GroundController.Friction = 0
 			self.PushFrictionActive = true
 		end
-		self.HRP:ApplyImpulse(data.Velocity * self.HRP.AssemblyMass)
+		if not (typeof(packet) == "table" and typeof(packet.Direction) == "Vector3") then
+			self:ApplyImpulse(data.Velocity.Unit, data.Velocity.Magnitude)
+		end
 		return
 	end
 
@@ -266,7 +276,13 @@ end
 function Movement:ProcessInputPhase(...) return self.StateMachine:ProcessInputPhase(...) end
 function Movement:HandleStateChange(...) return self.StateMachine:Change(...) end
 function Movement:HasBufferedKey(...) return self.StateMachine:HasBufferedKey(...) end
-function Movement:SetEquipLoad(...) return self.Runtime:SetEquipLoad(...) end
+function Movement:SetWeight(...) return self.Runtime:SetWeight(...) end
+function Movement:SetEquipLoad(...) return self:SetWeight(...) end
+function Movement:ApplyImpulse(direction: Vector3, strength: number)
+	if not self.Ready or typeof(direction) ~= "Vector3" or direction.Magnitude <= 0.001 then return end
+	if typeof(strength) ~= "number" or strength == 0 then return end
+	self.HRP:ApplyImpulse(direction.Unit * strength * self.BaseMass)
+end
 function Movement:GetSpread() return self.CurrentSpread end
 function Movement:SetDoubleJumps(...) return self.Runtime:SetDoubleJumps(...) end
 function Movement:IsGrounded() return self.Ready and self.Frame.Grounded end

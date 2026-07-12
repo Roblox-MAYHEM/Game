@@ -46,7 +46,8 @@ return function(targetCharacter: Model, direction: Vector3, params: KnockbackPar
 	local targetPlayer = Players:GetPlayerFromCharacter(targetCharacter)
 	if targetPlayer then
 		Remotes.Knockback:FireClient(targetPlayer, {
-			Velocity = velocity,
+			Direction = velocity.Unit,
+			Strength = velocity.Magnitude,
 			Mode = params.MODE or "Finisher",
 			Duration = params.DURATION,
 			WallDaze = params.WALL_DAZE == true,

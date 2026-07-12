@@ -183,7 +183,7 @@ function BaseWeapon:_CanEquip()
 		and self.ViewModel:IsAlive()
 		and self.Movement
 		and self.Movement.Ready
-		and self.Movement.SetEquipLoad
+		and self.Movement.SetWeight
 		and self.wWeapon
 		and self.vWeapon
 end
@@ -205,7 +205,7 @@ function BaseWeapon:_Equip()
 	end
 
 	reparent(self.wWeapon, self.Character)
-	self.Movement:SetEquipLoad(self.Config.EQUIP_LOAD)
+	self.Movement:SetWeight(self.Config.EQUIP_LOAD)
 
 	local ADS = self.Config.AimDownSights
 	local equipped = self.ViewModel:Equip(self.vWeapon, {
@@ -256,7 +256,7 @@ function BaseWeapon:_Unequip()
 	self._trove:Remove(self.CamState)
 
 	if self.Movement then
-		self.Movement.SpeedMult = 1
+		self.Movement:SetWeight(1)
 	end
 end
 
