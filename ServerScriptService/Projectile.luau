@@ -86,6 +86,52 @@ function Projectile.ApplyUpdate(id: number, position: Vector3?, velocity: Vector
 	return true
 end
 
+function Projectile.Pause(id: number, position: Vector3?)
+	local cast = ActiveCasts[id]
+	if not cast then return false end
+	if position then pcall(function() cast:SetPosition(position) end) end
+	pcall(function() cast:Pause() end)
+	replicateToClients(nil, "Pause", id, position)
+	return true
+end
+
+function Projectile.Deflect(id: number, owner: Player, direction: Vector3)
+	local cast = ActiveCasts[id]
+	if not cast or typeof(direction) ~= "Vector3" or direction.Magnitude <= 0.001 then return false end
+	local userData = cast.UserData
+	if not userData or not userData.Deflectable then return false end
+
+	local speed = cast:GetVelocity().Magnitude
+	if speed <= 0.001 and userData.PendingContact then
+		speed = userData.PendingContact.Velocity.Magnitude
+	end
+	if speed <= 0.001 then return false end
+
+	local oldOwner = userData.Owner
+	local position = userData.PendingContact and userData.PendingContact.Position or cast:GetPosition()
+	local velocity = direction.Unit * speed
+	userData.PendingContact = nil
+	userData.HitProcessed = nil
+	userData.Owner = owner
+
+	local params = cast.RayInfo and cast.RayInfo.Parameters
+	if params then
+		local filter = {}
+		for _, instance in ipairs(params.FilterDescendantsInstances) do
+			if not oldOwner or instance ~= oldOwner.Character then filter[#filter + 1] = instance end
+		end
+		if owner.Character then filter[#filter + 1] = owner.Character end
+		params.FilterDescendantsInstances = filter
+	end
+
+	position += direction.Unit * 0.5
+	cast:SetPosition(position)
+	cast:SetVelocity(velocity)
+	cast:Resume()
+	replicateToClients(owner, "Resume", id, position, velocity, owner)
+	return true
+end
+
 function Projectile.Terminate(id: number)
 	local cast = ActiveCasts[id]
 	if cast then

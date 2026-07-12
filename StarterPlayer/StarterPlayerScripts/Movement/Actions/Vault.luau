@@ -10,23 +10,32 @@ function Vault:Start(movement, data)
 	self.Name = "Vault"
 	self.Direction = data.Direction
 	self.EndsAt = time() + config.Duration
+	self.JumpAt = time() + config.JumpExitDelay
 
-	local height = math.max(data.TopPosition.Y - movement.HRP.Position.Y, 0)
-	local lift = math.clamp(
-		math.sqrt(2 * workspace.Gravity * height),
-		config.MinLiftStrength,
-		config.MaxLiftStrength
-	)
-	local forward = math.max(config.MinForwardStrength, movement.Frame.MoveVelocity:Dot(self.Direction))
+	local currentForward = movement.Frame.MoveVelocity:Dot(self.Direction)
+	local gain = math.max(config.MinForwardSpeed - currentForward, config.ForwardGain)
+	local currentUp = movement.Frame.Velocity:Dot(movement.CM.UpDirection)
 
 	movement.Humanoid.AutoRotate = false
-	movement:ApplyImpulse(self.Direction, forward)
-	movement:ApplyImpulse(movement.CM.UpDirection, lift)
+	if data.TooClose then movement:ApplyImpulse(-self.Direction, config.CloseNudge) end
+	movement:Boost(self.Direction, gain, config.MaxForwardSpeed)
+	movement:ApplyImpulse(movement.CM.UpDirection, math.max(config.LiftSpeed - currentUp, 0))
 end
 
 function Vault:Update(movement, _dt)
 	movement:_OwnAir(0)
 	movement.CM.FacingDirection = self.Direction
+	local wantsJump = movement.SpaceBufferedUntil >= time() or movement:IsJumpHeld()
+	if time() >= self.JumpAt and wantsJump then
+		local config = movement.Config.Actions.Vault
+		movement.SpaceBufferedUntil = 0
+		movement.JumpCooldownUntil = time() + movement.Config.Jump.Cooldown
+		movement:Boost(self.Direction, config.JumpForwardGain, config.JumpForwardCap)
+		local up = movement.CM.UpDirection
+		local currentUp = movement.HRP.AssemblyLinearVelocity:Dot(up)
+		movement:ApplyImpulse(up, math.max(movement.Config.Jump.Strength - currentUp, 0))
+		return false
+	end
 	return time() < self.EndsAt
 end
 

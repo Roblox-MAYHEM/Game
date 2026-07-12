@@ -14,6 +14,8 @@ local RaycastModule = {
 	EdgeLength = 10,
 	WallLength = 3,
 	BackLength = 6,
+	VaultLength = 10,
+	VaultCloseLength = 3,
 	WallHeights = { -1.0, -0.2, 0.8 },
 	WallInset = 0.75,
 	MaxPierces = 25,
@@ -32,15 +34,11 @@ local function obstacleRoot(inst)
 	return inst and (inst:FindFirstAncestorOfClass("Model") or inst)
 end
 
-local function isVaultable(inst)
-	if not inst then return false end
-
-	if CollectionService:HasTag(inst, "Vaultable") then
-		return true
-	end
-
+local function blocksVault(inst)
+	if not inst then return true end
 	local root = obstacleRoot(inst)
-	return root ~= inst and CollectionService:HasTag(root, "Vaultable")
+	return CollectionService:HasTag(inst, "NoVault")
+		or (root ~= inst and CollectionService:HasTag(root, "NoVault"))
 end
 
 function RaycastModule:Init()
@@ -159,17 +157,6 @@ function RaycastModule:_CastInset(origin, direction, visualize, extraIgnore)
 	return self:_Cast(origin - unit * self.WallInset, direction + unit * self.WallInset, visualize, extraIgnore)
 end
 
-function RaycastModule:_BestHit(origins, direction, visualize, extraIgnore)
-	local best = nil
-	for i = 1, #origins do
-		local hit = self:_CastInset(origins[i], direction, visualize, extraIgnore)
-		if hit and (not best or hit.Distance < best.Distance) then
-			best = hit
-		end
-	end
-	return best
-end
-
 function RaycastModule:_DirCheck(dir, visualize, length, debugSide)
 	local mag = dir.Magnitude
 	if mag <= 0.001 then
@@ -237,70 +224,38 @@ function RaycastModule:BackCheck(visualize, length)
 end
 
 function RaycastModule:VaultCheck(forwardDir)
-	local forward = (forwardDir and forwardDir.Magnitude > 0.001)
-		and forwardDir.Unit
-		or self.HRP.CFrame.LookVector
+	local direction = forwardDir or self.HRP.CFrame.LookVector
+	local forward = Vector3.new(direction.X, 0, direction.Z)
+	if forward.Magnitude <= 0.001 then return nil, "NoDirection" end
+	forward = forward.Unit
 
-	local groundHit = self:GroundCheck(false, self.GroundLength + 1.5)
-	local groundY = groundHit and groundHit.Position.Y or (self.HRP.Position.Y - 3)
-
-	local pos = self.HRP.Position
-	local frontHit = self:_BestHit({
-		Vector3.new(pos.X, groundY + 0.5, pos.Z),
-		Vector3.new(pos.X, groundY + 1.75, pos.Z),
-	}, forward * self.WallLength, false)
-
-	if not frontHit then
-		return nil, "NoFrontHit"
+	local up = Vector3.yAxis
+	local bodyHit = self:_Cast(
+		self.HRP.Position - up * 0.6,
+		forward * self.VaultLength,
+		false
+	)
+	if not bodyHit then return nil, "NoBodyHit" end
+	if blocksVault(bodyHit.Instance) then
+		return nil, "NoVault"
 	end
 
-	if not isVaultable(frontHit.Instance) then
-		return nil, "NotVaultable"
-	end
+	local headHit = self:_Cast(
+		self.Head.Position + up,
+		forward * self.VaultLength,
+		false
+	)
+	if headHit then return nil, "HeadBlocked" end
 
-	local obstacle = obstacleRoot(frontHit.Instance)
-	local inset = frontHit.Position - frontHit.Normal * 0.25
-	local maxHeight = 12.5
-
-	local topHit = self:_Cast(
-		Vector3.new(inset.X, groundY + maxHeight + 2, inset.Z),
-		-Vector3.yAxis * (maxHeight + 4),
+	local closeHit = self:_Cast(
+		self.HRP.Position + up * 0.1,
+		forward * self.VaultCloseLength,
 		false
 	)
 
-	if not topHit then
-		return nil, "NoTopHit"
-	end
-
-	if obstacleRoot(topHit.Instance) ~= obstacle then
-		return nil, "TopMismatch"
-	end
-
-	local overHit = nil
-	for distance = 2, 8 do
-		local hit = self:_Cast(
-			topHit.Position + Vector3.yAxis * 1.5 + forward * distance,
-			-Vector3.yAxis * (maxHeight + self.GroundLength + 2),
-			false
-		)
-
-		if hit and obstacleRoot(hit.Instance) ~= obstacle then
-			overHit = hit
-			break
-		end
-	end
-
-	local delta = frontHit.Position - self.HRP.Position
-	local forwardDistance = delta.X * forward.X + delta.Z * forward.Z
-	local tooClose = forwardDistance > 0 and forwardDistance <= 3
-
 	return {
-		Part = frontHit.Instance,
-		TopPosition = topHit.Position,
-		OverHit = overHit,
-		OverPosition = overHit and overHit.Position,
-		HeightFromGround = topHit.Position.Y - groundY,
-		TooClose = tooClose,
+		Part = bodyHit.Instance,
+		TooClose = closeHit ~= nil,
 	}
 end
 

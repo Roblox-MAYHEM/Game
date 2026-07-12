@@ -41,12 +41,18 @@ end
 local function processProjectileHit(self, cast, result, velocity)
 	local userData = cast.UserData or {}
 	if userData.HitProcessed then return end
+	local _model, hitHum = ProjectileUtils.GetHumanoidHit(result)
+	if userData.Deflectable and hitHum then
+		userData.PendingVisual = true
+		cast:SetPosition(result.Position)
+		cast:Pause()
+		return
+	end
 	userData.HitProcessed = true
 	userData.PendingHitbox = nil
 
 	local id = userData.ProjectileId
 	local hitPart = result.Instance
-	local _model, hitHum = ProjectileUtils.GetHumanoidHit(result)
 
 	if hitHum then
 		Remotes.WeaponEvent:FireServer(
@@ -74,6 +80,12 @@ local function setupProjectileCaster(self)
 	behavior.MaxDistance = shootInfo.PROJ_RANGE or 1000
 	behavior.Acceleration = shootInfo.PROJ_ACCEL or Vector3.zero
 	behavior.RaycastParams = ProjectileUtils.DefaultRayParams(self.Player)
+	behavior.CanPierceFunction = function(cast, result)
+		local userData = cast.UserData
+		return userData ~= nil
+			and userData.Deflectable == true
+			and ProjectileUtils.GetHumanoidHit(result) ~= nil
+	end
 	local provider = self.Projectile.Visuals.ApplyProvider(behavior, shootInfo.PROJ_NAME or "Bullet", math.max(shootInfo.PELLETS or 1, 4))
 
 	self.Projectile.RegisterCaster(caster)
@@ -375,6 +387,7 @@ function RangedBehavior:_GetShotPattern(): (Vector3, {Vector3})
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
 	params.FilterDescendantsInstances = { self.Character, self.ViewModel.ViewModel }
+	print(filter)
 
 
 	if workspace:Raycast(headPos, origin - headPos, params) then

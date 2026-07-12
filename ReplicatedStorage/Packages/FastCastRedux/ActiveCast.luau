@@ -301,6 +301,11 @@ local function SimulateCast(cast: ActiveCast, delta: number, expectingShortCall:
 						else
 							-- Recalculating hit something pierceable instead.
 							SendRayPierced(cast, subResult, subVelocity, cast.RayInfo.CosmeticBulletObject) -- This may result in CancelHighResCast being set to true.
+							if cast.StateInfo.Paused then
+								cast.StateInfo.IsActivelyResimulating = false
+								cast.StateInfo.IsActivelySimulatingPierce = false
+								return
+							end
 							local vis = DbgVisualizeHit(CFrame.new(point), true)
 							if (vis ~= nil) then vis.Color3 = Color3.new(1, 0.113725, 0.588235) end
 							if (dbgSeg ~= nil) then dbgSeg.Color3 = Color3.new(0.305882, 0.243137, 0.329412) end
@@ -351,7 +356,7 @@ local function SimulateCast(cast: ActiveCast, delta: number, expectingShortCall:
 					warn("WARNING: The pierce callback for this cast returned TRUE on Terrain! This can cause severely adverse effects.")
 				end
 				
-				if params.FilterType == Enum.RaycastFilterType.Blacklist then
+				if params.FilterType == Enum.RaycastFilterType.Exclude then
 					-- blacklist
 					-- DO NOT DIRECTLY TABLE.INSERT ON THE PROPERTY
 					local filter = params.FilterDescendantsInstances
@@ -369,6 +374,11 @@ local function SimulateCast(cast: ActiveCast, delta: number, expectingShortCall:
 				end
 				
 				SendRayPierced(cast, resultOfCast, segmentVelocity, cast.RayInfo.CosmeticBulletObject)
+				if cast.StateInfo.Paused then
+					cast.RayInfo.Parameters.FilterDescendantsInstances = originalFilter
+					cast.StateInfo.IsActivelySimulatingPierce = false
+					return
+				end
 				
 				-- List has been updated, so let's cast again.
 				resultOfCast = targetWorldRoot:Raycast(lastPoint, rayDir, params)

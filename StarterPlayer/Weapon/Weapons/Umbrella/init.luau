@@ -62,7 +62,18 @@ function Weapon.new(opts)
 	self.Open, self.Close, self.Reset = Animate(self.ViewModel)
 	self._trove:Add(self.Reset)
 
-	self.HitboxPart = self.wWeapon:WaitForChild("Hitbox")
+	self.Hitbox = ClientHitbox.new({
+		Character = self.Character,
+		Movement = self.Movement,
+		Shape = self.LungeInfo.HITBOX_SHAPE,
+		Size = self.LungeInfo.HITBOX_SIZE,
+		Offset = self.LungeInfo.HITBOX_OFFSET,
+		HitBoost = self.LungeInfo.HIT_BOOST,
+		HitBoostCap = self.LungeInfo.HIT_BOOST_CAP,
+	})
+	self.Hitbox:OnHumHit(function(humanoid)
+		Remotes.WeaponEvent:FireServer("ProcessHit", humanoid.Parent)
+	end)
 
 	self.Animations.Lunge:SetDuration(self.LungeInfo.ACTIVE_TIME + self.LungeInfo.OPEN_TIME)
 	self.Animations.Open:SetDuration(0.17)
@@ -158,11 +169,6 @@ end
 function Weapon:Equip()
 	if not self:_Equip() then return end
 	self:_setupGlideForces()
-
-	self.Hitbox = ClientHitbox.new(self.HitboxPart)
-	self.Hitbox:OnHumHit(function(humanoid)
-		Remotes.WeaponEvent:FireServer("ProcessHit", humanoid.Parent)
-	end)
 
 	self.States.Equipping = true
 	if self.Animations.Equip then

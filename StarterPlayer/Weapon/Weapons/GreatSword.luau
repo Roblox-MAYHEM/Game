@@ -41,8 +41,15 @@ function Weapon.new(opts)
 	self.LastSwingTime = 0
 
 	self.AttackInfo = self.Config.Attack
-	self.HitboxPart = self.wWeapon:WaitForChild("Hitbox")
-	self.Hitbox = ClientHitbox.new(self.HitboxPart)
+	self.Hitbox = ClientHitbox.new({
+		Character = self.Character,
+		Movement = self.Movement,
+		Shape = self.AttackInfo.HITBOX_SHAPE,
+		Size = self.AttackInfo.HITBOX_SIZE,
+		Offset = self.AttackInfo.HITBOX_OFFSET,
+		HitBoost = self.AttackInfo.HIT_BOOST,
+		HitBoostCap = self.AttackInfo.HIT_BOOST_CAP,
+	})
 	self.Hitbox:OnHumHit(function(humanoid)
 		Remotes.WeaponEvent:FireServer("ProcessHit", humanoid.Parent)
 	end)

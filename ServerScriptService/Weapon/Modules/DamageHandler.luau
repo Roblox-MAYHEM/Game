@@ -145,23 +145,24 @@ function Damager.DamageHumanoid(humanoid: Humanoid, attacker: Player, amount: nu
 		bufferHit(attacker, humanoid, appliedDamage)
 	end
 
-	if oldHealth - appliedDamage <= 0 then
-		character:SetAttribute(Config.DEAD_ATTRIBUTE, true)
+	-- TEMP: disabling to test knockback
+	--if oldHealth - appliedDamage <= 0 then
+	--	character:SetAttribute(Config.DEAD_ATTRIBUTE, true)
 
-		humanoid.Health = 0
+	--	humanoid.Health = 0
 
-		pcall(function()
-			humanoid:ChangeState(Enum.HumanoidStateType.Dead)
-		end)
+	--	pcall(function()
+	--		humanoid:ChangeState(Enum.HumanoidStateType.Dead)
+	--	end)
 
-		if victim then
-			publishDeath(victim, attacker, forcedKiller)
-		end
+	--	if victim then
+	--		publishDeath(victim, attacker, forcedKiller)
+	--	end
 
-		return
-	end
+	--	return
+	--end
 
-	humanoid:TakeDamage(appliedDamage)
+	--humanoid:TakeDamage(appliedDamage)
 end
 
 function Damager.KillHumanoid(humanoid: Humanoid, attacker: Player, friendlyFire: boolean?, forcedKiller: Player?)

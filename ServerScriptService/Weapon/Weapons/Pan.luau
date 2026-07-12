@@ -19,8 +19,6 @@ function Weapon.new(WeaponModel, player)
 	setmetatable(self, Weapon)
 
 	self.AttackInfo = self.Config.Attack
-	self.CurrentAttack = nil
-	self.LastHits = {}
 
 	self.AttackValidator = MeleeValidator.new(self.Character, { -- Settings
 		Window = self.AttackInfo.WINDOW,
@@ -75,21 +73,9 @@ function Weapon:Unequip()
 	self:_Unequip()
 end
 
-function Weapon:HandleProjectileUpdate(id, position, velocity)
-	local cast = self.Projectile.Get(id)
-	if not cast or not cast.UserData or not cast.UserData.Deflectable then
-		return
-	end
-
-	self.Projectile.ApplyUpdate(id, position, velocity, self.Player)
-end
-
-function Weapon:Deflect(id, newDir)
-	local cast = self.Projectile.Get(id)
-	if not cast then return end
-
-	local speed = cast:GetVelocity().Magnitude
-	self:HandleProjectileUpdate(id, nil, newDir * speed)
+function Weapon:HandleProjectileUpdate(id, _position, velocity)
+	if typeof(velocity) ~= "Vector3" or velocity.Magnitude <= 0.001 then return end
+	self.Projectile.Deflect(id, self.Player, velocity.Unit)
 end
 
 return Weapon

@@ -26,16 +26,26 @@ function Locomotion:Update(dt: number)
 		ground.DecelerationTime = running.DecelerationTime
 		ground.TurnSpeedFactor = running.TurnSpeedFactor
 
+		local landing = running.HardLanding
+		local carrying = time() < (movement.LandingCarryUntil or 0)
+		if carrying and movement.LandingCarryDirection.Magnitude > 0.001 then
+			local requested = wish == Vector3.zero and movement.LandingCarryDirection or wish
+			local steered = movement.LandingCarryDirection:Lerp(requested, landing.ControlScale)
+			wish = steered.Magnitude > 0.001 and steered.Unit or Vector3.zero
+		end
+
 		local counterSteering = wish ~= Vector3.zero and speed > 0.1 and velocity.Unit:Dot(wish) < 0
 		local fast = math.clamp((speed - running.MoveSpeed) / math.max(running.MomentumRange, 0.01), 0, 1)
-		ground.Friction = if time() < (movement.PushGripUntil or 0)
+		ground.Friction = if carrying
+			then landing.Friction
+			elseif time() < (movement.PushGripUntil or 0)
 			then running.FastFriction
 			elseif counterSteering
 			then running.CounterFriction
 			else math.lerp(running.Friction, running.FastFriction, fast)
 
 		movement.CM.MovingDirection = wish
-		movement.CM.BaseMoveSpeed = math.max(running.MoveSpeed, wish ~= Vector3.zero and velocity:Dot(wish) or 0)
+		movement.CM.BaseMoveSpeed = math.max(running.MoveSpeed, speed)
 		return
 	end
 

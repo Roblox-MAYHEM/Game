@@ -132,11 +132,25 @@ function Movement:ApplyImpulse(direction: Vector3, strength: number)
 	self.HRP:ApplyImpulse(direction.Unit * strength * self.BaseMass)
 end
 
+function Movement:Boost(direction: Vector3, gain: number, maxSpeed: number)
+	if not self.Ready or typeof(direction) ~= "Vector3" or direction.Magnitude <= 0.001 then return 0 end
+	gain = math.max(tonumber(gain) or 0, 0)
+	maxSpeed = math.max(tonumber(maxSpeed) or math.huge, 0)
+	local unit = direction.Unit
+	local current = self.HRP.AssemblyLinearVelocity:Dot(unit)
+	local effectiveWeight = self.EffectiveWeight or 1
+	local strength = math.min(gain, math.max(maxSpeed - current, 0) * effectiveWeight)
+	if strength > 0 then self:ApplyImpulse(unit, strength) end
+	return strength / effectiveWeight
+end
+
 function Movement:SetWeight(weight)
 	if not self.Ready then return end
 	weight = math.max(tonumber(weight) or 1, 0.1)
 	local p = self._basePhysProps
-	local density = (self.BaseMass * weight) / self.BaseVolume
+	local exaggeration = self.Config.Movement.WeightExaggeration or 1
+	local effectiveWeight = math.max(1 + (weight - 1) * exaggeration, 0.1)
+	local density = (self.BaseMass * effectiveWeight) / self.BaseVolume
 	self.HRP.CustomPhysicalProperties = PhysicalProperties.new(
 		density,
 		p.Friction,
@@ -145,24 +159,48 @@ function Movement:SetWeight(weight)
 		p.ElasticityWeight
 	)
 	self.Weight = weight
+	self.EffectiveWeight = effectiveWeight
 end
 
-function Movement:TryVault(mode)
+function Movement:_HandleLanding()
+	local landing = self.Config.Ground.HardLanding
+	local downSpeed = self.PeakDownwardSpeed or 0
+	self.PeakDownwardSpeed = 0
+	if downSpeed < landing.MinDownSpeed then return end
+
+	local alpha = math.clamp(
+		(downSpeed - landing.MinDownSpeed) / math.max(landing.MaxDownSpeed - landing.MinDownSpeed, 0.01),
+		0,
+		1
+	)
+	local buffered = self.SpaceBufferedUntil >= time()
+	local responseScale = buffered and landing.BufferedJumpScale or 1
+	local velocity = self.Frame.MoveVelocity
+	local speed = velocity.Magnitude
+	if speed > 0.1 then
+		local bleed = math.lerp(landing.MinBleed, landing.MaxBleed, alpha) * responseScale
+		self:ApplyImpulse(-velocity.Unit, speed * bleed)
+		if not buffered then
+			self.LandingCarryDirection = velocity.Unit
+			self.LandingCarryUntil = time() + landing.SlideDuration * math.lerp(0.65, 1, alpha)
+		end
+	end
+end
+
+function Movement:TryVault()
 	if self.ActiveAction or not self.Frame.Grounded or time() < (self.VaultCooldownUntil or 0) then return false end
-	local config = self.Config.Actions.Vault
 	local direction = self.Frame.WorldWishDir
 	if direction == Vector3.zero and self.Frame.MoveVelocity.Magnitude > 0.1 then
 		direction = self.Frame.MoveVelocity.Unit
 	end
 	if direction == Vector3.zero then return false end
-	if mode == "Auto" and self.Frame.MoveVelocity.Magnitude < config.AutoMinSpeed then return false end
 
 	local result = Cast:VaultCheck(direction)
-	if not result or result.HeightFromGround > config.MaxHeight then return false end
-	self.VaultCooldownUntil = time() + config.Cooldown
+	if not result then return false end
+	self.VaultCooldownUntil = time() + self.Config.Actions.Vault.Cooldown
 	return self:StartAction("Vault", {
 		Direction = direction,
-		TopPosition = result.TopPosition,
+		TooClose = result.TooClose,
 	})
 end
 
@@ -201,6 +239,10 @@ function Movement:TryJump()
 	self:ApplyImpulse(self.CM.UpDirection, self.Config.Jump.Strength)
 	self.JumpCooldownUntil = now + self.Config.Jump.Cooldown
 	return true
+end
+
+function Movement:IsJumpHeld()
+	return UserInputService:IsKeyDown(Enum.KeyCode.Space)
 end
 
 function Movement:StartLunge(direction, config)
@@ -261,6 +303,31 @@ function Movement:_UpdatePresentation()
 		self.SpreadChanged:Fire(spread)
 	end
 
+	if self.ViewModel and self.ViewModel.SetTilt then
+		local inputX = self.Frame.WishDir.X
+		local sign = if math.abs(inputX) > 0.05 then math.sign(inputX) else 0
+		local alpha, impulse = 0, 0
+		if sign ~= 0 then
+			local up = self.CM.UpDirection
+			local camera = workspace.CurrentCamera
+			local right = camera and (camera.CFrame.RightVector - up * camera.CFrame.RightVector:Dot(up)) or Vector3.zero
+			local lateral = right.Magnitude > 0.001 and self.Frame.MoveVelocity:Dot(right.Unit) or 0
+			local fullSpeed = math.max(self.CM.BaseMoveSpeed, self.Humanoid.WalkSpeed, 16)
+			local aligned = math.clamp(sign * lateral / fullSpeed, -1, 1)
+			local oppose = math.sqrt((1 - aligned) * 0.5)
+			alpha = sign * math.clamp(
+				self.Config.Movement.TiltBase + oppose * self.Config.Movement.TiltOppose,
+				0,
+				1
+			)
+			if self.LastTiltSign ~= 0 and sign ~= self.LastTiltSign then
+				impulse = sign * self.Config.Movement.TiltSnap
+			end
+		end
+		self.LastTiltSign = sign
+		self.ViewModel:SetTilt(alpha, impulse)
+	end
+
 	if self.ActiveAction then
 		self.state = self.ActiveAction.Name
 	elseif not self.Frame.Grounded then
@@ -276,9 +343,15 @@ function Movement:Update(dt)
 	if not self.Ready or not self.Enabled then return end
 	self.FrameTracker:Update(dt)
 
+	if not self.Frame.Grounded then
+		local downSpeed = -self.Frame.Velocity:Dot(self.CM.UpDirection)
+		self.PeakDownwardSpeed = math.max(self.PeakDownwardSpeed or 0, downSpeed)
+	end
+
 	if self.Frame.JustLanded then
 		self.AirJumps = 0
 		self.WallRunCooldownUntil = 0
+		self:_HandleLanding()
 		self.Landed:Fire()
 	end
 
@@ -287,17 +360,13 @@ function Movement:Update(dt)
 	end
 
 	if self.SpaceBufferedUntil >= time() then
-		local consumed = false
-		if not self.ActiveAction and self.Frame.Grounded then consumed = self:TryVault("Manual") end
+		local consumed = not self.ActiveAction and self.Frame.Grounded and self:TryVault() or false
 		if not consumed then consumed = self:TryJump() end
 		if consumed then self.SpaceBufferedUntil = 0 end
 	end
 
 	if not self.ActiveAction then
 		self:TryWallRun()
-		if not self.ActiveAction and self.Frame.Grounded and self.Frame.WorldWishDir ~= Vector3.zero then
-			self:TryVault("Auto")
-		end
 	end
 
 	if not self.ActiveAction then self.Locomotion:Update(dt) end
@@ -363,6 +432,7 @@ function Movement:Init(props)
 	self.BaseMass = hrp.AssemblyMass
 	self.BaseVolume = hrp.Mass / physical.Density
 	self.Weight = 1
+	self.EffectiveWeight = 1
 	self.MaxAirJumps = self.Config.Jump.DoubleJumps
 	self.AirJumps = 0
 	self.SpaceBufferedUntil = 0
@@ -370,6 +440,10 @@ function Movement:Init(props)
 	self.VaultCooldownUntil = 0
 	self.WallRunCooldownUntil = 0
 	self.PushGripUntil = 0
+	self.LandingCarryUntil = 0
+	self.LandingCarryDirection = Vector3.zero
+	self.PeakDownwardSpeed = 0
+	self.LastTiltSign = 0
 	self.CurrentSpread = 0
 	self.state = "Idle"
 
@@ -379,8 +453,7 @@ function Movement:Init(props)
 	loadPresentation(self, trove)
 
 	trove:Connect(RunService.RenderStepped, function(dt) self:Update(dt) end)
-	trove:Connect(UserInputService.InputBegan, function(input, gameProcessed)
-		if gameProcessed or input.KeyCode ~= Enum.KeyCode.Space then return end
+	trove:Connect(UserInputService.JumpRequest, function()
 		self.SpaceBufferedUntil = time() + self.Config.Movement.JumpBufferTime
 	end)
 	trove:Connect(Events.Knockback.OnClientEvent, function(packet) self:ApplyKnockback(packet) end)

@@ -73,13 +73,14 @@ function Weapon:ProcessHit(shotId: string, HitHum: Humanoid, HitPart: BasePart, 
 	if not HRP then return end
 
 	local distance = hit and hit.DistanceAlong or (HitPos - HRP.Position).Magnitude
-	local damage = self.getDamageFalloff(distance)
+	local pelletCount = math.max(self.ShootInfo.PELLETS or 1, 1)
+	local damage = self.getDamageFalloff(distance) / pelletCount
 	local targetCharacter = HitHum.Parent
 	local targetRoot = targetCharacter and targetCharacter:FindFirstChild("HumanoidRootPart")
 	local direction = targetRoot and (targetRoot.Position - HRP.Position) or (HitPos - HRP.Position)
 
 	ImpactService.ApplyHit(targetCharacter, self.Player, {
-		Power = self.ShootInfo.IMPACT_POWER,
+		Power = self.ShootInfo.IMPACT_POWER / pelletCount,
 		Direction = direction,
 		FinisherMultiplier = self.ShootInfo.FINISHER_MULTIPLIER,
 		UpwardVelocity = self.ShootInfo.FINISHER_Y,

@@ -13,6 +13,13 @@
 ]]
 
 return {
+	["Boots"] = {
+		NAME = "Stomp Boots",
+		THUMBNAIL = "",
+		CATEGORY = "Melee",
+		DESCRIPTION = "Equip in the air to stomp.",
+	},
+
 	["BaseballBat"] = {
 		NAME = "Baseball Bat",
 		THUMBNAIL = "https://www.roblox.com/asset-thumbnail/image?assetId=106617770261676&width=420&height=420&format=png",
@@ -127,4 +134,3 @@ return {
 		DESCRIPTION = "",
 	}
 }
-

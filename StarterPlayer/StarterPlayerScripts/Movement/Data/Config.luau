@@ -2,6 +2,7 @@ return {
 	Movement = {
 		JumpBufferTime = 0.14,
 		CoyoteTime = 0.2,
+		WeightExaggeration = 1.2,
 		TiltBase = 0.15,
 		TiltOppose = 0.9,
 		TiltSnap = 0.4,
@@ -18,6 +19,16 @@ return {
 		CounterFriction = 3.2,
 		TurnSpeedFactor = 0.1,
 		BulletSpread = 1,
+		HardLanding = {
+			MinDownSpeed = 44,
+			MaxDownSpeed = 85,
+			MinBleed = 0.07,
+			MaxBleed = 0.18,
+			SlideDuration = 0.3,
+			ControlScale = 0.28,
+			Friction = 0.18,
+			BufferedJumpScale = 0.15,
+		},
 	},
 
 	Air = {
@@ -41,10 +52,16 @@ return {
 			Cooldown = 0.2,
 			Duration = 0.32,
 			AutoMinSpeed = 15,
-			MinForwardStrength = 20,
+			MinForwardSpeed = 20,
+			ForwardGain = 8,
+			MaxForwardSpeed = 34,
 			MinLiftStrength = 14,
 			MaxLiftStrength = 30,
 			MaxHeight = 6,
+			CloseNudge = 3,
+			JumpExitDelay = 0.16,
+			JumpForwardGain = 7,
+			JumpForwardCap = 40,
 		},
 		WallRun = {
 			Cooldown = 0.35,

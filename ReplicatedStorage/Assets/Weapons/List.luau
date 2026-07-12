@@ -1,5 +1,6 @@
 local module = {
 	"BaseballBat",
+	"Boots",
 	"ClassicSword",
 	"GreatSword",
 	"DBShotgun",

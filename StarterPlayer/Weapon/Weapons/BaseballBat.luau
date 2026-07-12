@@ -59,7 +59,6 @@ function Weapon.new(opts)
 
 	self.AttackInfo = self.Config.Attack
 	self.SpecialInfo = self.Config.Special
-	self.HitboxPart = self.wWeapon:WaitForChild("Hitbox")
 
 	self.Effects:Register("EnableTrail", function(weapon)
 		weapon.Primary.Trail.Enabled = true
@@ -69,7 +68,15 @@ function Weapon.new(opts)
 		weapon.Primary.Trail.Enabled = false
 	end)
 
-	self.Hitbox = ClientHitbox.new(self.HitboxPart)
+	self.Hitbox = ClientHitbox.new({
+		Character = self.Character,
+		Movement = self.Movement,
+		Shape = self.AttackInfo.HITBOX_SHAPE,
+		Size = self.AttackInfo.HITBOX_SIZE,
+		Offset = self.AttackInfo.HITBOX_OFFSET,
+		HitBoost = self.AttackInfo.HIT_BOOST,
+		HitBoostCap = self.AttackInfo.HIT_BOOST_CAP,
+	})
 	self.Hitbox:OnHumHit(function(humanoid, result, segment)
 		Remotes.WeaponEvent:FireServer("ProcessHit", humanoid.Parent, workspace.CurrentCamera.CFrame.LookVector)
 	end)

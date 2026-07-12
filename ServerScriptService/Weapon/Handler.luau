@@ -30,6 +30,29 @@ local playerConnections = {}
 local playerDeployConnections = {}
 local configReloadConnection: RBXScriptConnection? = nil
 
+local function getWeaponModel(name: string)
+	local model = WeaponModels:FindFirstChild(name)
+	if model or name ~= "Boots" then return model end
+
+	model = Instance.new("Model")
+	model.Name = "Boots"
+	local primary = Instance.new("Part")
+	primary.Name = "Primary"
+	primary.Size = Vector3.new(0.25, 0.25, 0.25)
+	primary.Transparency = 1
+	primary.CanCollide = false
+	primary.CanQuery = false
+	primary.CanTouch = false
+	primary.Massless = true
+	primary.Parent = model
+	local attachment = Instance.new("Attachment")
+	attachment.Name = "HandleAttachment"
+	attachment.Parent = primary
+	model.PrimaryPart = primary
+	model.Parent = WeaponModels
+	return model
+end
+
 local function getHotbarFolder(player: Player): Folder
 	local Hotbar = player:FindFirstChild("Hotbar")
 	if not Hotbar then
@@ -176,7 +199,7 @@ function WeaponSystem._CreateHotbar(player: Player)
 		end
 
 		local weaponModule = Weapons[name]
-		local weaponModel = WeaponModels:FindFirstChild(name)
+		local weaponModel = getWeaponModel(name)
 
 		if weaponModule and weaponModel then
 			info.Hotbar[name] = weaponModule.new(weaponModel, player)

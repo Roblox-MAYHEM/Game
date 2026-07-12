@@ -38,8 +38,15 @@ function Weapon.new(opts)
 	self.LastAttackTime = 0
 	self.ActionToken = nil
 	self.BaseGrip = CFrame.new()
-	self.HitboxPart = self.wWeapon:WaitForChild("Hitbox")
-	self.Hitbox = ClientHitbox.new(self.HitboxPart)
+	self.Hitbox = ClientHitbox.new({
+		Character = self.Character,
+		Movement = self.Movement,
+		Shape = self.AttackInfo.HITBOX_SHAPE,
+		Size = self.AttackInfo.HITBOX_SIZE,
+		Offset = self.AttackInfo.HITBOX_OFFSET,
+		HitBoost = self.AttackInfo.HIT_BOOST,
+		HitBoostCap = self.AttackInfo.HIT_BOOST_CAP,
+	})
 	self.Hitbox:OnHumHit(function(humanoid)
 		Remotes.WeaponEvent:FireServer("ProcessHit", humanoid.Parent)
 	end)
@@ -119,11 +126,9 @@ function Weapon:Lunge()
 	self.Hitbox:HitStop()
 	self:_SetGrip(self.LungeInfo.GRIP_OUT)
 
-	if self.HRP then
-		local velocity = self.HRP.CFrame.LookVector * (self.LungeInfo.FORWARD_VELOCITY or 0)
-			+ (self.LungeInfo.FLOAT_VELOCITY or Vector3.zero)
-		self.HRP:ApplyImpulse(velocity * self.HRP.AssemblyMass)
-	end
+	self.Movement:ApplyImpulse(self.HRP.CFrame.LookVector, self.LungeInfo.FORWARD_VELOCITY or 0)
+	local float = self.LungeInfo.FLOAT_VELOCITY or Vector3.zero
+	if float.Magnitude > 0 then self.Movement:ApplyImpulse(float.Unit, float.Magnitude) end
 
 	self.Hitbox:HitStart(self.LungeInfo.HIT_TIME or self.LungeInfo.TIME)
 	Remotes.WeaponEvent:FireServer("Lunge")

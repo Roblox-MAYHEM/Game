@@ -170,3 +170,46 @@ No old/new compatibility framework remains after migration. Temporary bridges st
 - Full shotgun contact approximates configured whole-shot damage and Impact instead of multiplying config by pellet count.
 - A player can deflect a physical projectile during approach or briefly after visible contact without taking the canceled hit.
 - Airborne Boots equip causes an immediate readable stomp, radial landing response, and direct-hit rebound.
+
+## Playtest Correction Pass
+
+The first implementation exposed several incorrect motion semantics. Correct them without restoring the removed FSM.
+
+### Momentum and Landing
+
+Ground locomotion preserves total horizontal speed while turning. It must not reduce preserved speed to the velocity projected onto current input. Normal controller input bends momentum with speed-dependent authority.
+
+Track peak downward speed while airborne. An ordinary landing has no penalty. A hard landing applies one small horizontal speed bleed, then briefly favors the entry direction with reduced steering so the player slides rather than stops. A buffered landing jump cancels most landing bleed and the control penalty, creating a timing-based momentum chain. Landing never becomes an exclusive state.
+
+Vaulting follows the older reference behavior while retaining Roblox impulses:
+
+- `UserInputService.JumpRequest` feeds the shared jump buffer. Do not depend on filtered raw `InputBegan` for jump or vault activation.
+- A forward body ray from slightly below the root must hit an ordinary collidable obstacle.
+- A forward clearance ray from above the head must miss.
+- A short root-height ray detects obstacles close enough to need a backward clearance nudge.
+- `Vaultable` tags are not required; `NoVault` may opt specific geometry out.
+- Vaulting is jump-triggered and predictable. Do not auto-vault merely from running into geometry.
+- No top-surface ray, obstacle-top matching, or height calculation gates action start. The body-hit/head-clear gap is the height filter, matching the working reference.
+- Incoming horizontal speed is preserved.
+- Vault applies only missing forward and vertical velocity rather than adding current velocity again.
+- Holding or buffering jump through the vault produces a bounded forward/up vault-jump exit.
+
+Keep this path small: `Handler` owns jump buffering and action selection, `RaycastModule` answers whether reference-style clearance exists, and `Actions/Vault` owns the short physical response. Remove `mode`, `TopPosition`, auto-speed, maximum-height, and lift-from-height fields made unused by this contract. Do not move raycasting into `Handler` or create a vault state/controller.
+
+### Bounded Combat Boosts
+
+Raw melee impulses are replaced by `Movement:Boost(direction, gain, maxSpeed)`. Boost reads current velocity along the requested direction, adds only the bounded missing amount, preserves lateral and vertical velocity, and routes the result through the weight-aware impulse path. A melee volume may trigger one boost total per swing, regardless of how many targets overlap it.
+
+### Weight
+
+One movement-level multiplier slightly exaggerates deviation from neutral weight. Values above one become heavier; values below one become lighter. No weapon-specific duplicate scaling is added.
+
+### Presentation and Debugging
+
+Restore viewmodel movement tilt directly in the movement presentation update, including direction-change snap. Do not restore `Runtime` or another presentation state object.
+
+When `Settings.VisualizeDebug` is enabled, each active virtual melee sample draws its block or sphere through `DebugVisualize`. Debug frames are recycled while the volume runs so visualization does not accumulate adornments.
+
+### DB Shotgun
+
+Keep whole-shot budget semantics. Convert DB Shotgun's old per-pellet-era config to meaningful full-shot damage and Impact totals before division. Do not remove pellet division or add a DB-specific damage path.

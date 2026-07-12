@@ -10,6 +10,8 @@ Weapon : {
 ]]
 
 return {
+	["Boots"] = {},
+
 	["Pistol"] = {
 		["Idle"] 	= {"18878460332", Enum.AnimationPriority.Action, true},
 		["Equip"] 	= {"111830256722862", Enum.AnimationPriority.Action2, true},
