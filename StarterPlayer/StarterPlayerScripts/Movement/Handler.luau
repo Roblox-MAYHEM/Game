@@ -182,6 +182,7 @@ function Movement:ApplyKnockback(packet)
 	if not self.Ready or not self.HRP or not self.StateMachine then return end
 
 	local data = {}
+	local mode = "Finisher"
 
 	if typeof(packet) == "Vector3" then
 		data.Velocity = packet / math.max(self.HRP.AssemblyMass, 0.001)
@@ -194,6 +195,10 @@ function Movement:ApplyKnockback(packet)
 			return
 		end
 
+		if packet.Mode == "Push" then
+			mode = "Push"
+		end
+
 		data.Duration = numberOrNil(packet.Duration)
 		data.WallDaze = packet.WallDaze == true
 		data.DazeDuration = numberOrNil(packet.DazeDuration)
@@ -204,6 +209,10 @@ function Movement:ApplyKnockback(packet)
 	end
 
 	if data.Velocity.Magnitude <= 0.001 then return end
+	if mode == "Push" then
+		self.HRP:ApplyImpulse(data.Velocity * self.HRP.AssemblyMass)
+		return
+	end
 
 	self.StateMachine:Change("Knockback", data)
 end

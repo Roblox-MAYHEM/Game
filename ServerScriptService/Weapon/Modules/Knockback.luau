@@ -6,6 +6,7 @@ local Remotes = ReplicatedStorage.Events
 type KnockbackParams = {
 	FORCE: number?,
 	IMPULSE: number?,
+	MODE: ("Push" | "Finisher")?,
 	Y: number?,
 	YMAX: number?,
 	FLAT: boolean?,
@@ -47,6 +48,7 @@ return function(targetCharacter: Model, direction: Vector3, params: KnockbackPar
 	if targetPlayer then
 		Remotes.Knockback:FireClient(targetPlayer, {
 			Velocity = velocity,
+			Mode = params.MODE or "Finisher",
 			Duration = params.DURATION,
 			WallDaze = params.WALL_DAZE == true,
 			DazeDuration = params.DAZE_DURATION,
