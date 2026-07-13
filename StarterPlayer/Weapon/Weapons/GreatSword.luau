@@ -14,9 +14,6 @@ Weapon.Binds = {
 	[Enum.UserInputState.Begin] = {
 		[Enum.UserInputType.MouseButton1] = "Attack",
 	},
-	[Enum.UserInputState.End] = {
-		[Enum.UserInputType.MouseButton1] = "StopAttack",
-	},
 }
 
 function Weapon.new(opts)
@@ -32,8 +29,7 @@ function Weapon.new(opts)
 	self.States = {
 		Equipped = false,
 		Equipping = false,
-		HeavyAttacking = false,
-		TriggerHeld = false,
+		ActiveContact = false,
 		SpecialCooldown = false,
 	}
 	self.ComboStep = 1
@@ -50,7 +46,13 @@ function Weapon.new(opts)
 		HitBoost = self.AttackInfo.HIT_BOOST,
 		HitBoostCap = self.AttackInfo.HIT_BOOST_CAP,
 	})
-	self.Hitbox:OnHumHit(function(humanoid)
+	self.Hitbox:OnHumHit(function(humanoid, firstHit)
+		if firstHit then
+			local info = self:_SwingInfo(self.ComboStep)
+			local strength = info.SPECIAL and 1.7 or 1.1
+			self.Camera:CameraShake("ShakeOnce", strength, 10, 0, 0.12)
+			self.ViewModel:AdjustSpring("gunSpring", Vector3.new(0.12, -0.08, 0) * strength)
+		end
 		Remotes.WeaponEvent:FireServer("ProcessHit", humanoid.Parent)
 	end)
 
@@ -58,12 +60,11 @@ function Weapon.new(opts)
 end
 
 function Weapon:CanUnequip()
-	return not self.States.HeavyAttacking
+	return not self.States.ActiveContact
 end
 
 function Weapon:_SwingInfo(index: number)
-	local swings = self.AttackInfo.SWINGS
-	return (swings and swings[index]) or self.AttackInfo
+	return self.AttackInfo.SWINGS[index]
 end
 
 function Weapon:Equip()
@@ -71,55 +72,49 @@ function Weapon:Equip()
 	self.Hitbox:Reconcile()
 
 	self.States.Equipping = true
-	if self.Animations.Equip then
-		self.Animations.Equip:Play()
-		self.Animations.Equip.Stopped:Wait()
-	else
-		task.wait(self.Config.Equip.TIME)
-	end
+	self.Animations.Equip:Play()
+	self.Animations.Equip.Stopped:Wait()
 
 	if not self.States.Equipping then return end
 	self.States.Equipping = false
 	self.States.Equipped = true
-	if self.Animations.Idle then self.Animations.Idle:Play() end
-end
-
-function Weapon:_PlayHeavyAnimation(index: number)
-	local info = self:_SwingInfo(index)
-	local anim = self.Animations[info.ANIM or `Swing{index}`]
-	if anim then
-		anim:SetDuration(info.TIME or self.AttackInfo.TIME)
-		anim:Play()
-	end
+	self.Animations.Idle:Play()
 end
 
 function Weapon:_Swing(index: number)
+	local token = self:NewActionToken()
 	local info = self:_SwingInfo(index)
 	local totalTime = info.TIME or self.AttackInfo.TIME
 	local hitDelay = info.HIT_DELAY or self.AttackInfo.HIT_DELAY or 0
 	local hitTime = info.HIT_TIME or self.AttackInfo.HIT_TIME or totalTime
 
-	self.States.HeavyAttacking = true
-	Remotes.WeaponEvent:FireServer("AttackStart", index)
-	self:_PlayHeavyAnimation(index)
+	local animation = self.Animations[info.ANIM]
+	animation:SetDuration(totalTime)
+	animation:Play()
 
 	task.wait(hitDelay)
+	if not self:IsActionCurrent(token) then return false end
+	self.States.ActiveContact = true
+	Remotes.WeaponEvent:FireServer("AttackStart", index)
 	self.Hitbox:HitStart(hitTime)
 	task.wait(hitTime)
+	if not self:IsActionCurrent(token) then return false end
 	self.Hitbox:HitStop()
+	self.States.ActiveContact = false
 
 	local remaining = totalTime - hitDelay - hitTime
 	task.wait(math.max(remaining, 0))
+	if not self:IsActionCurrent(token) then return false end
 
-	self.States.HeavyAttacking = false
 	self.LastSwingTime = tick()
+	return true
 end
 
 function Weapon:_AttackLoop(token)
 	while self.AttackLoop == token
 		and self.States.Equipped
 		and not self.States.SpecialCooldown
-		and (self.States.TriggerHeld or self.QueuedAttack)
+		and self.QueuedAttack
 	do
 		if tick() - self.LastSwingTime > (self.AttackInfo.CHAIN_RESET or 1) then
 			self.ComboStep = 1
@@ -127,7 +122,7 @@ function Weapon:_AttackLoop(token)
 
 		local index = self.ComboStep
 		self.QueuedAttack = false
-		self:_Swing(index)
+		if not self:_Swing(index) then break end
 
 		if index >= 3 then
 			self.ComboStep = 1
@@ -148,7 +143,6 @@ end
 function Weapon:Attack()
 	if self.States.SpecialCooldown or not self.States.Equipped then return end
 
-	self.States.TriggerHeld = true
 	self.QueuedAttack = true
 
 	if not self.AttackLoop then
@@ -160,17 +154,13 @@ function Weapon:Attack()
 	end
 end
 
-function Weapon:StopAttack()
-	self.States.TriggerHeld = false
-end
-
-function Weapon:Unequip()
-	if not self:CanUnequip() then return false end
+function Weapon:Unequip(force: boolean?)
+	if not force and not self:CanUnequip() then return false end
 
 	self:_Unequip()
 	self.States.Equipping = false
 	self.States.Equipped = false
-	self.States.TriggerHeld = false
+	self.States.ActiveContact = false
 	self.States.SpecialCooldown = false
 	self.QueuedAttack = false
 	self.AttackLoop = nil

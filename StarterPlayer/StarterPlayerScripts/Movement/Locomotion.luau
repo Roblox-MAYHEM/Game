@@ -21,16 +21,26 @@ function Locomotion:Update(dt: number)
 	if frame.Grounded then
 		local ground = movement.GroundController
 		local running = config.Ground
+		local shock = movement:GetLandingShock()
 		movement.CM.ActiveController = ground
-		ground.AccelerationTime = running.AccelerationTime
+		ground.AccelerationTime = running.AccelerationTime * math.lerp(
+			1,
+			running.HardLanding.ShockAccelerationMultiplier,
+			shock
+		)
 		ground.DecelerationTime = running.DecelerationTime
-		ground.TurnSpeedFactor = running.TurnSpeedFactor
+		ground.TurnSpeedFactor = running.TurnSpeedFactor * math.lerp(
+			1,
+			running.HardLanding.ShockTurnScale,
+			shock
+		)
 
 		local landing = running.HardLanding
 		local carrying = time() < (movement.LandingCarryUntil or 0)
 		if carrying and movement.LandingCarryDirection.Magnitude > 0.001 then
 			local requested = wish == Vector3.zero and movement.LandingCarryDirection or wish
-			local steered = movement.LandingCarryDirection:Lerp(requested, landing.ControlScale)
+			local control = landing.ControlScale * math.lerp(1, landing.ShockControlScale, shock)
+			local steered = movement.LandingCarryDirection:Lerp(requested, control)
 			wish = steered.Magnitude > 0.001 and steered.Unit or Vector3.zero
 		end
 

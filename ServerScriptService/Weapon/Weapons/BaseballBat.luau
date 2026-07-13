@@ -23,8 +23,7 @@ function Weapon.new(WeaponModel, player)
 	self.SpecialInfo = self.Config.Special
 	self.CurrentAttack = nil
 	self.Winding = false
-	self.WindupVal = 0
-	self.WindupConnection = nil
+	self.WindupStarted = 0
 
 	self.AttackValidator = MeleeValidator.new(self.Character, {
 		Window = self.AttackInfo.WINDOW,
@@ -38,8 +37,15 @@ function Weapon.new(WeaponModel, player)
 end
 
 function Weapon:AttackStart()
-	self.CurrentAttack = nil
+	local attack = { EndTime = time() + self.AttackInfo.HIT_TIME, IsSpecial = false }
+	self.CurrentAttack = attack
 	self.AttackValidator:BeginAttack()
+	task.delay(self.AttackInfo.HIT_TIME, function()
+		if self.CurrentAttack == attack then
+			self.CurrentAttack = nil
+			self.AttackValidator:EndAttack()
+		end
+	end)
 	return true
 end
 
@@ -58,8 +64,8 @@ function Weapon:_GetHitContext(targetCharacter: Model)
 	local finisherY = self.AttackInfo.FINISHER_Y
 
 	if isSpecial then
-		damage = (self.SpecialInfo.BASE_DMG or damage) + charge * (self.SpecialInfo.WIND_MULT or 0)
-		impactPower = (self.SpecialInfo.BASE_IMPACT or impactPower) + charge * (self.SpecialInfo.IMPACT_CHARGE_MULT or 0)
+		damage += ((self.SpecialInfo.BASE_DMG or damage) - damage) * charge
+		impactPower += ((self.SpecialInfo.BASE_IMPACT or impactPower) - impactPower) * charge
 		finisherMultiplier = self.SpecialInfo.FINISHER_MULTIPLIER or finisherMultiplier
 		finisherY = self.SpecialInfo.FINISHER_Y or finisherY
 	end
@@ -95,13 +101,7 @@ function Weapon:Windup()
 	if self.Winding then return false end
 
 	self.Winding = true
-	self.WindupVal = 0
-	self.WindupConnection = task.spawn(function()
-		while self.Winding and self.WindupVal < self.WindupInfo.MAX do
-			self.WindupVal += 1
-			task.wait(self.WindupInfo.RATE)
-		end
-	end)
+	self.WindupStarted = time()
 
 	return true
 end
@@ -110,12 +110,7 @@ function Weapon:CancelWindup()
 	if not self.Winding then return false end
 
 	self.Winding = false
-	self.WindupVal = 0
-
-	if self.WindupConnection then
-		task.cancel(self.WindupConnection)
-		self.WindupConnection = nil
-	end
+	self.WindupStarted = 0
 
 	return true
 end
@@ -123,19 +118,27 @@ end
 function Weapon:Special()
 	if not self.Winding then return false end
 
-	local charge = self.WindupVal
+	local charge = math.clamp((time() - self.WindupStarted) / self.WindupInfo.TIME, 0, 1)
 	self:CancelWindup()
 
-	local duration = self.SpecialInfo.HIT_TIME or self.SpecialInfo.DURATION or self.SpecialInfo.TIME or 1
+	local duration = self.SpecialInfo.HIT_TIME
 	local attack = {
-		EndTime = time() + duration,
+		EndTime = math.huge,
 		IsSpecial = true,
 		Charge = charge,
 	}
 
 	self.CurrentAttack = attack
-	self.AttackValidator:BeginAttack()
+	return true
+end
 
+function Weapon:SpecialStart()
+	local attack = self.CurrentAttack
+	if not attack or not attack.IsSpecial then return false end
+
+	local duration = self.SpecialInfo.HIT_TIME
+	attack.EndTime = time() + duration
+	self.AttackValidator:BeginAttack()
 	task.delay(duration, function()
 		if self.CurrentAttack == attack then
 			self.CurrentAttack = nil

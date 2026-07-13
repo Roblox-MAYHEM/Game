@@ -1,17 +1,7 @@
---[[
-Weapon.new(Config) -- Initializes values
-Weapon:[_Behavior Name Here_]() -- Runs Weapon
-Weapon:Unequip() -- When tool has been unequipped
+local RunService = game:GetService("RunService")
 
-Behaviors will perform certain weapon-specific moves.
-Modularized for easier reuse and combination.
-]]
-
-local ServerStorage = game:GetService("ServerStorage")
-local RunService	= game:GetService("RunService")
-
-local WeaponSystem	= script.Parent.Parent
-local Modules		= WeaponSystem.Modules
+local WeaponSystem = script.Parent.Parent
+local Modules = WeaponSystem.Modules
 
 local BaseWeapon = require(WeaponSystem.BaseWeapon)
 local DamageHandler = require(Modules.DamageHandler)
@@ -19,7 +9,7 @@ local DamageFalloff = require(Modules.DamageFalloff)
 local StatusBurn = require(script.StatusBurn)
 local HBXCollision = require(script.HitboxCollision)
 
-local Weapon = setmetatable({}, {__index = BaseWeapon})
+local Weapon = setmetatable({}, { __index = BaseWeapon })
 Weapon.__index = Weapon
 
 local function init(self)
@@ -116,7 +106,10 @@ function Weapon:UpdateFlames(ShootPosition : CFrame)
 end
 
 function Weapon:ExitFlames()
-	self.HitboxDetection:Disconnect()
+	if self.HitboxDetection then
+		self.HitboxDetection:Disconnect()
+		self.HitboxDetection = nil
+	end
 end
 
 function Weapon:Equip()
@@ -124,11 +117,8 @@ function Weapon:Equip()
 end
 
 function Weapon:Unequip()
+	self:ExitFlames()
 	self:_Unequip()
-end
-
-function Weapon:Shoot(...)
-	self.ProjectileCaster:Fire(...)
 end
 
 return Weapon

@@ -175,6 +175,23 @@ function Movement:_HandleLanding()
 	)
 	local buffered = self.SpaceBufferedUntil >= time()
 	local responseScale = buffered and landing.BufferedJumpScale or 1
+	local shock = alpha * responseScale
+	self.LandingShockStrength = shock
+	self.LandingShockUntil = time() + landing.ShockDuration
+
+	if shock > 0 then
+		self.Camera:CameraShake(
+			"ShakeOnce",
+			landing.CameraMagnitude * shock,
+			landing.CameraRoughness,
+			0,
+			landing.CameraFadeOut,
+			Vector3.new(0.15, 0.7, 0.15),
+			Vector3.new(0.65, 0.2, 0.35)
+		)
+		self.ViewModel:AdjustSpring("gunSpring", Vector3.new(0, -landing.ViewmodelKick * shock, 0))
+	end
+
 	local velocity = self.Frame.MoveVelocity
 	local speed = velocity.Magnitude
 	if speed > 0.1 then
@@ -185,6 +202,13 @@ function Movement:_HandleLanding()
 			self.LandingCarryUntil = time() + landing.SlideDuration * math.lerp(0.65, 1, alpha)
 		end
 	end
+end
+
+function Movement:GetLandingShock()
+	local remaining = (self.LandingShockUntil or 0) - time()
+	if remaining <= 0 then return 0 end
+	local duration = self.Config.Ground.HardLanding.ShockDuration
+	return (self.LandingShockStrength or 0) * math.clamp(remaining / math.max(duration, 0.01), 0, 1)
 end
 
 function Movement:TryVault()
@@ -293,11 +317,13 @@ function Movement:_UpdateFacing()
 end
 
 function Movement:_UpdatePresentation()
-	local spread = self.Config.Ground.BulletSpread * math.clamp(
+	local ground = self.Config.Ground
+	local spread = ground.BulletSpread * math.clamp(
 		self.Frame.MoveVelocity.Magnitude / math.max(self.Config.Ground.MoveSpeed, 0.01),
 		0,
 		1
 	)
+	spread += ground.HardLanding.ShockSpread * self:GetLandingShock()
 	if math.abs(spread - self.CurrentSpread) > 0.001 then
 		self.CurrentSpread = spread
 		self.SpreadChanged:Fire(spread)
@@ -416,6 +442,7 @@ function Movement:Init(props)
 	self.HRP = hrp
 	self.CM = cm
 	self.ViewModel = props.ViewModel
+	self.Camera = props.Camera
 	if not self:_GetControllers(cm) then
 		warn("[Movement] controller children missing")
 		return
@@ -442,6 +469,8 @@ function Movement:Init(props)
 	self.PushGripUntil = 0
 	self.LandingCarryUntil = 0
 	self.LandingCarryDirection = Vector3.zero
+	self.LandingShockStrength = 0
+	self.LandingShockUntil = 0
 	self.PeakDownwardSpeed = 0
 	self.LastTiltSign = 0
 	self.CurrentSpread = 0

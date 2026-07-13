@@ -1,25 +1,14 @@
---[[
-Weapon.new(Config) -- Initializes values
-Weapon:[_Behavior Name Here_]() -- Runs Weapon
-Weapon:Unequip() -- When tool has been unequipped
-
-Weapons will perform certain weapon-specific moves.
-Also fires events to server.
-]]
-
-
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local WeaponSystem 		= script.Parent.Parent
+local WeaponSystem = script.Parent.Parent
 
-local Cooldown      = require(ReplicatedStorage.Utils.Cooldown)
+local Cooldown = require(ReplicatedStorage.Utils.Cooldown)
 local FastCast = require(ReplicatedStorage.Packages.FastCastRedux)
 local ProjectileUtils = require(ReplicatedStorage.Utils.ProjectileUtils)
 
 local BaseWeapon = require(WeaponSystem.BaseWeapon)
 
--- Weapon Class
-local Weapon = setmetatable({}, {__index = BaseWeapon})
+local Weapon = setmetatable({}, { __index = BaseWeapon })
 Weapon.__index = Weapon
 
 Weapon.Binds = {
@@ -129,12 +118,8 @@ function Weapon:Equip()
 	if not self:_Equip() then return end
 
 	self.States.Equipping = true
-	if self.Animations.Equip then
-		self.Animations.Equip:Play()
-		self.Animations.Equip.Stopped:Wait()
-	else
-		task.wait(self.Config.Equip.TIME)
-	end
+	self.Animations.Equip:Play()
+	self.Animations.Equip.Stopped:Wait()
 
 	if not self.States.Equipping then return end
 
@@ -146,18 +131,17 @@ function Weapon:Equip()
 
 end
 
-local DebugVisualize = require(ReplicatedStorage.Utils.DebugVisualize)
 function Weapon:Throw()
 	if self.States.Throwing then return end
 	if Cooldown.get("Throw") then return end
 
 	self.States.Throwing = true
+	local token = self:NewActionToken()
 	self.Animations.Throw:Play()
 
 	local shootPoint = self.WeaponModel[1].Primary:FindFirstChild("ShootPoint")
 	local origin = shootPoint.WorldPosition
 	local dir = workspace.CurrentCamera.CFrame.LookVector
-	DebugVisualize.vector(origin, dir, Color3.fromRGB(255,0,0))
 
 	self:_SetWeaponVis(false)
 
@@ -168,6 +152,7 @@ function Weapon:Throw()
 
 	task.spawn(function()
 		self.Animations.Throw.Stopped:Wait()
+		if not self:IsActionCurrent(token) then return end
 		self.States.Throwing = false
 		Cooldown.set("Throw", self.ThrowInfo.COOLDOWN)
 		self:_SetWeaponVis(true)

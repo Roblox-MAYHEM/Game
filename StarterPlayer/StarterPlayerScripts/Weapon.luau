@@ -1,5 +1,8 @@
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
+local StarterPlayer = game:GetService("StarterPlayer")
+
+local BaseWeapon = require(StarterPlayer.Weapon.BaseWeapon)
 
 local KEYNUMS = {
 	Enum.KeyCode.One,
@@ -70,7 +73,7 @@ function WeaponSystem:Init(properties)
 
 	local function unequipWeapon()
 		if equippedWeapon then
-			equippedWeapon:Unequip()
+			equippedWeapon:Unequip(true)
 			equippedWeapon = nil
 		end
 
@@ -212,6 +215,7 @@ function WeaponSystem:Init(properties)
 			task.delay(0.25, function()
 				configReloadQueued = false
 				waitForServerHotbarRevision(WeaponConfig:GetAttribute(CONFIG_REVISION_ATTRIBUTE))
+				BaseWeapon.ReloadConfig()
 				rebuildHotbar(equippedWeapon and equippedWeapon.Name or nil, currentIndex, true)
 			end)
 		end)

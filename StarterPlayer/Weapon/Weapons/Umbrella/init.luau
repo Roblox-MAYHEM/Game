@@ -1,28 +1,15 @@
---[[
-Weapon.new(Config) -- Initializes values
-Weapon:[_Behavior Name Here_]() -- Runs Weapon
-Weapon:Unequip() -- When tool has been unequipped
-
-Weapons will perform certain weapon-specific moves.
-Also fires events to server.
-]]
-
-local RunService        = game:GetService("RunService")
-local Client = game:GetService("StarterPlayer")
+local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Players           = game:GetService("Players")
 
-local WeaponSystem 		= script.Parent.Parent
+local WeaponSystem = script.Parent.Parent
 local Modules = WeaponSystem.Modules
-local Libraries  = Client.Libraries
-local Remotes    = ReplicatedStorage.Events
-local Bindables  = Client.Bindables
+local Remotes = ReplicatedStorage.Events
 
-local Cooldown      = require(ReplicatedStorage.Utils.Cooldown)
-local ClientHitbox  = require(Modules.ClientHitbox)
+local Cooldown = require(ReplicatedStorage.Utils.Cooldown)
+local ClientHitbox = require(Modules.ClientHitbox)
 
 local BaseWeapon = require(WeaponSystem.BaseWeapon)
-local Animate    = require(script:WaitForChild("Animate"))
+local Animate = require(script:WaitForChild("Animate"))
 
 -- ── Weapon Class ─────────────────────────────────────────────────────
 local Weapon = setmetatable({}, { __index = BaseWeapon })
@@ -30,11 +17,11 @@ Weapon.__index = Weapon
 
 Weapon.Binds = {
 	[Enum.UserInputState.Begin] = {
-		[Enum.UserInputType.MouseButton1] = "BeginGlide",
-		[Enum.UserInputType.MouseButton2] = "Lunge",
+		[Enum.UserInputType.MouseButton1] = "Lunge",
+		[Enum.UserInputType.MouseButton2] = "BeginGlide",
 	},
 	[Enum.UserInputState.End] = {
-		[Enum.UserInputType.MouseButton1] = "EndGlide",
+		[Enum.UserInputType.MouseButton2] = "EndGlide",
 	},
 }
 
@@ -71,7 +58,12 @@ function Weapon.new(opts)
 		HitBoost = self.LungeInfo.HIT_BOOST,
 		HitBoostCap = self.LungeInfo.HIT_BOOST_CAP,
 	})
-	self.Hitbox:OnHumHit(function(humanoid)
+	self.Hitbox:OnHumHit(function(humanoid, firstHit)
+		if firstHit then
+			self.Movement:Boost(self.Movement.CM.UpDirection, self.LungeInfo.HIT_LIFT_GAIN, self.LungeInfo.HIT_LIFT_CAP)
+			self.Camera:CameraShake("ShakeOnce", 0.8, 10, 0, 0.12)
+			self.ViewModel:AdjustSpring("gunSpring", Vector3.new(0.096, -0.064, 0))
+		end
 		Remotes.WeaponEvent:FireServer("ProcessHit", humanoid.Parent)
 	end)
 
@@ -110,11 +102,9 @@ end
 
 -- ── Glide physics ────────────────────────────────────────────────────
 function Weapon:_setupGlideForces()
-	local character = Players.LocalPlayer.Character
-	if not character then return end
+	if self._glideDrag and self._glideDrag.Parent then return end
 
-	local root = character:FindFirstChild("HumanoidRootPart")
-	if not root then return end
+	local root = self.Character.HumanoidRootPart
 
 	self._glideRoot     = root
 	self._glideCurrentK = self.GlideInfo.K_CLOSED
@@ -155,14 +145,19 @@ function Weapon:_glideStep(dt)
 	local alpha = 1 - math.exp(-dt / math.max(tau, 1e-4))
 	self._glideCurrentK += (self._glideTargetK - self._glideCurrentK) * alpha
 
-	local v    = root.AssemblyLinearVelocity
+	local up = self.Movement.CM.UpDirection or Vector3.yAxis
+	local v = root.AssemblyLinearVelocity
+	local vertical = up * v:Dot(up)
+	local horizontal = v - vertical
 	local mass = root.AssemblyMass
-
-	drag.Force = v.Magnitude > 1e-3
-		and (-mass * self._glideCurrentK * v.Magnitude * v)
+	local horizontalExcess = math.max(horizontal.Magnitude - gi.HORIZONTAL_FREE_SPEED, 0)
+	local verticalDrag = -mass * self._glideCurrentK * vertical.Magnitude * vertical
+	local horizontalDrag = horizontalExcess > 0
+		and (-mass * gi.HORIZONTAL_DRAG * horizontalExcess * horizontal)
 		or Vector3.zero
+	drag.Force = verticalDrag + horizontalDrag
 
-	lift.Force = Vector3.new(0, (1 - gi.GRAVITY_SCALE_OPEN) * mass * workspace.Gravity, 0)
+	lift.Force = up * ((1 - gi.GRAVITY_SCALE_OPEN) * mass * workspace.Gravity)
 end
 
 -- ── Equip / Unequip ──────────────────────────────────────────────────
@@ -171,12 +166,8 @@ function Weapon:Equip()
 	self:_setupGlideForces()
 
 	self.States.Equipping = true
-	if self.Animations.Equip then
-		self.Animations.Equip:Play()
-		self.Animations.Equip.Stopped:Wait()
-	else
-		task.wait(self.Config.Equip.TIME)
-	end
+	self.Animations.Equip:Play()
+	self.Animations.Equip.Stopped:Wait()
 
 	self.Effects:Play("Held")
 
@@ -187,15 +178,12 @@ function Weapon:Equip()
 end
 
 function Weapon:Unequip()
-	self:_Unequip()
 	self:EndGlide(true)
 	self:CancelLunge()
+	self:_Unequip()
 
 	self.States.Equipping       = false
 	self.States.Equipped        = false
-	self._glideRoot             = nil
-	self._glideDrag             = nil
-	self._glideLift             = nil
 	self._glideConnection       = nil
 	self._glideLandedConnection = nil
 	self._glideCurrentK         = self.GlideInfo.K_CLOSED
@@ -218,7 +206,9 @@ function Weapon:BeginGlide()
 	self.States.Gliding = true
 	self._glideTargetK  = self.GlideInfo.K_OPEN
 
-	self.Movement:ApplyImpulse(Vector3.yAxis, self.GlideInfo.POP_SPEED)
+	local up = self.Movement.CM.UpDirection or Vector3.yAxis
+	local fallingSpeed = math.max(-self._glideRoot.AssemblyLinearVelocity:Dot(up), 0)
+	self.Movement:ApplyImpulse(up, math.min(fallingSpeed * self.GlideInfo.CATCH_RATIO, self.GlideInfo.CATCH_MAX))
 
 	self._glideConnection = RunService.RenderStepped:Connect(function(dt)
 		self:_glideStep(dt)
@@ -266,6 +256,7 @@ function Weapon:Lunge()
 	if Cooldown.get("Lunge") then return end
 
 	Cooldown.set("Lunge", self.LungeInfo.COOLDOWN)
+	local token = self:NewActionToken()
 
 	self.Animations.OpenIdle:Stop()
 	if not self.States.Gliding then
@@ -273,30 +264,26 @@ function Weapon:Lunge()
 	end
 
 	self.States.Lunging = true
-	self.Hitbox:HitStart(self.LungeInfo.ACTIVE_TIME)
-	Remotes.WeaponEvent:FireServer("Lunge")
-
 	self.Animations.Lunge:Play()
 	self.Sounds.Lunge:Play()
 	self.Effects:Play("Lunge")
 
 	self.Movement:StartLunge(workspace.CurrentCamera.CFrame.LookVector, {
 		Duration = self.LungeInfo.ACTIVE_TIME + self.LungeInfo.OPEN_TIME,
-		Strength = self.LungeInfo.FORWARD_VELOCITY,
+		Gain = self.LungeInfo.FORWARD_GAIN,
+		MaxSpeed = self.LungeInfo.FORWARD_CAP,
 		SteeringScale = 0.1,
 	})
 
-	local cnx
-	cnx = Bindables.EndLunge.Event:Once(function()
-		self:CancelLunge()
-		cnx = nil
-	end)
+	task.wait(self.LungeInfo.OPEN_TIME)
+	if not self:IsActionCurrent(token) or not self.States.Lunging then return end
 
-	task.wait(self.LungeInfo.ACTIVE_TIME + self.LungeInfo.OPEN_TIME)
+	Remotes.WeaponEvent:FireServer("Lunge")
+	self.Hitbox:HitStart(self.LungeInfo.ACTIVE_TIME)
 
-	if cnx then
+	task.wait(self.LungeInfo.ACTIVE_TIME)
+	if self:IsActionCurrent(token) then
 		self:CancelLunge()
-		cnx:Disconnect()
 	end
 end
 
@@ -315,7 +302,6 @@ function Weapon:CancelLunge()
 	Remotes.WeaponEvent:FireServer("CancelLunge")
 
 	if not self.States.Gliding then
-		task.wait(0.1)
 		self.Close()
 	else
 		self.Animations.OpenIdle:Play()

@@ -1,25 +1,15 @@
---[[
-Weapon.new(Config) -- Initializes values
-Weapon:[_Behavior Name Here_]() -- Runs Weapon
-Weapon:Unequip() -- When tool has been unequipped
-
-Weapons will perform certain weapon-specific moves.
-Also fires events to server.
-]]
-
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local WeaponSystem 		= script.Parent.Parent
-local Modules 		= WeaponSystem.Modules
-local Remotes 		= ReplicatedStorage.Events
+local WeaponSystem = script.Parent.Parent
+local Modules = WeaponSystem.Modules
+local Remotes = ReplicatedStorage.Events
 
 local ClientHitbox = require(Modules.ClientHitbox)
 local ProjectileHitbox = require(ReplicatedStorage.Packages.ProjectileHitbox)
 
 local BaseWeapon = require(WeaponSystem.BaseWeapon)
 
--- Weapon Class
-local Weapon = setmetatable({}, {__index = BaseWeapon})
+local Weapon = setmetatable({}, { __index = BaseWeapon })
 Weapon.__index = Weapon
 
 Weapon.Binds = {
@@ -60,7 +50,7 @@ function Weapon.new(opts)
 		HitBoost = self.AttackInfo.HIT_BOOST,
 		HitBoostCap = self.AttackInfo.HIT_BOOST_CAP,
 	})
-	self.Hitbox:OnHumHit(function(humanoid, result, segment)
+	self.Hitbox:OnHumHit(function(humanoid)
 		Remotes.WeaponEvent:FireServer("ProcessHit", humanoid.Parent)
 	end)
 
@@ -86,12 +76,8 @@ function Weapon:Equip()
 	self.Hitbox:Reconcile()
 
 	self.States.Equipping = true
-	if self.Animations.Equip then
-		self.Animations.Equip:Play()
-		self.Animations.Equip.Stopped:Wait()
-	else
-		task.wait(self.Config.Equip.TIME)
-	end
+	self.Animations.Equip:Play()
+	self.Animations.Equip.Stopped:Wait()
 
 	if not self.States.Equipping then return end
 
@@ -113,7 +99,7 @@ function Weapon:_AttackOnce()
 	Remotes.WeaponEvent:FireServer("AttackStart")
 
 	self:_PlayAttackAnimation()
-	self:_PlayAttackSound()
+	self.Sounds.Swing:Play()
 
 	task.wait(self.AttackInfo.TIME)
 
@@ -160,12 +146,6 @@ function Weapon:_PlayAttackAnimation()
 	Selected:Play()
 
 	self.next = (self.next % #self.AnimList) + 1
-end
-
-function Weapon:_PlayAttackSound()
-	if self.Sounds.Swing then
-		self.Sounds.Swing:Play()
-	end
 end
 
 function Weapon:Unequip()

@@ -6,6 +6,7 @@ local Remotes = ReplicatedStorage.Events
 local Bindables = ServerStorage.Bindables
 
 local LevelSystem = require(ServerStorage.Libraries.LevelSystem)
+local ImpactService = require(script.Parent.ImpactService)
 
 local Config = {
 	LAST_HIT_MULTIPLIER = 1.5,
@@ -18,6 +19,7 @@ local DamageTable = {} -- { [VictimPlayer] = { [AttackerPlayer] = Damage } }
 local HitBuffer = {} -- { [AttackerPlayer] = { [Humanoid] = { damage = number, deadline = number } } }
 
 local Damager = {}
+local scoringEnabled = false
 
 local function bufferHit(attacker: Player, humanoid: Humanoid, amount: number)
 	HitBuffer[attacker] = HitBuffer[attacker] or {}
@@ -77,9 +79,14 @@ local function publishDeath(victim: Player, lastHit: Player?, forcedKiller: Play
 		end
 	end
 
-	Bindables.PlayerKilled:Fire(victim, killer)
 	Remotes.PlayerKill:FireAllClients(killer, victim)
 
+	if not scoringEnabled then
+		DamageTable[victim] = {}
+		return
+	end
+
+	Bindables.PlayerKilled:Fire(victim, killer)
 	if killer ~= victim then
 		local success, err = pcall(function()
 			LevelSystem.AwardKill(killer, victim)
@@ -145,24 +152,21 @@ function Damager.DamageHumanoid(humanoid: Humanoid, attacker: Player, amount: nu
 		bufferHit(attacker, humanoid, appliedDamage)
 	end
 
-	-- TEMP: disabling to test knockback
-	--if oldHealth - appliedDamage <= 0 then
-	--	character:SetAttribute(Config.DEAD_ATTRIBUTE, true)
+	if oldHealth - appliedDamage <= 0 then
+		character:SetAttribute(Config.DEAD_ATTRIBUTE, true)
+		ImpactService.Clear(character)
+		humanoid.Health = 0
+		pcall(function()
+			humanoid:ChangeState(Enum.HumanoidStateType.Dead)
+		end)
 
-	--	humanoid.Health = 0
+		if victim then
+			publishDeath(victim, attacker, forcedKiller)
+		end
+		return
+	end
 
-	--	pcall(function()
-	--		humanoid:ChangeState(Enum.HumanoidStateType.Dead)
-	--	end)
-
-	--	if victim then
-	--		publishDeath(victim, attacker, forcedKiller)
-	--	end
-
-	--	return
-	--end
-
-	--humanoid:TakeDamage(appliedDamage)
+	humanoid:TakeDamage(appliedDamage)
 end
 
 function Damager.KillHumanoid(humanoid: Humanoid, attacker: Player, friendlyFire: boolean?, forcedKiller: Player?)
@@ -170,14 +174,36 @@ function Damager.KillHumanoid(humanoid: Humanoid, attacker: Player, friendlyFire
 	Damager.DamageHumanoid(humanoid, attacker, humanoid.Health, friendlyFire, forcedKiller)
 end
 
+function Damager.SetScoringEnabled(enabled: boolean)
+	scoringEnabled = enabled == true
+end
+
+function Damager.ClearCharacter(character: Model)
+	if not character then return end
+	ImpactService.Clear(character)
+	local humanoid = character:FindFirstChildOfClass("Humanoid")
+	if humanoid then
+		for attacker, buffer in pairs(HitBuffer) do
+			buffer[humanoid] = nil
+			if next(buffer) == nil then HitBuffer[attacker] = nil end
+		end
+	end
+	local player = Players:GetPlayerFromCharacter(character)
+	if player then
+		DamageTable[player] = {}
+	end
+end
+
 local function setupPlayer(player: Player)
 	DamageTable[player] = {}
 
 	player.CharacterAdded:Connect(function(character)
+		ImpactService.Clear(character)
 		character:SetAttribute(Config.DEAD_ATTRIBUTE, false)
 	end)
 
 	if player.Character then
+		ImpactService.Clear(player.Character)
 		player.Character:SetAttribute(Config.DEAD_ATTRIBUTE, false)
 	end
 end
@@ -189,6 +215,8 @@ end
 Players.PlayerAdded:Connect(setupPlayer)
 
 Players.PlayerRemoving:Connect(function(player)
+	if player.Character then Damager.ClearCharacter(player.Character) end
+	for _, damageMap in pairs(DamageTable) do damageMap[player] = nil end
 	DamageTable[player] = nil
 	HitBuffer[player] = nil
 end)
@@ -196,11 +224,17 @@ end)
 Remotes.ResetCharacter.OnServerEvent:Connect(function(player)
 	local character = player.Character
 	if not character then return end
+	if character:GetAttribute(Config.DEAD_ATTRIBUTE) == true then return end
+	if player:GetAttribute("Deployed") ~= true and character:GetAttribute("Deployed") ~= true then
+		Damager.ClearCharacter(character)
+		Remotes.EnableMenu:FireClient(player)
+		return
+	end
 
 	local humanoid = character:FindFirstChildOfClass("Humanoid")
 	if not humanoid then return end
 
-	Damager.KillHumanoid(humanoid, player, true)
+	Damager.KillHumanoid(humanoid, player, true, player)
 end)
 
 return Damager

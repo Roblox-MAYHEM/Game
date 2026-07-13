@@ -61,6 +61,7 @@ function ClientHitbox:_Emit(part)
 	local humanoid = humanoidFromPart(part)
 	if humanoid then
 		if self.HitTargets[humanoid] then return end
+		local firstHit = next(self.HitTargets) == nil
 		self.HitTargets[humanoid] = true
 
 		if not self.Boosted and self.Movement and self.HitBoost > 0 then
@@ -70,7 +71,7 @@ function ClientHitbox:_Emit(part)
 				self.Boosted = true
 			end
 		end
-		for _, callback in ipairs(self.HumanoidCallbacks) do callback(humanoid, part, nil) end
+		for _, callback in ipairs(self.HumanoidCallbacks) do callback(humanoid, firstHit) end
 		return
 	end
 

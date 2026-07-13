@@ -5,7 +5,7 @@ local StarterPlayer = game:GetService("StarterPlayer")
 local Player = game:GetService("Players").LocalPlayer
 
 local WeaponSystem = script.Parent
-local WeaponAssets = ReplicatedStorage.Assets.Weapons
+local WeaponData = ReplicatedStorage.Assets.Weapons.Data
 
 local SoundController = require(StarterPlayer.Libraries.SoundController)
 local AnimationController = require(StarterPlayer.Libraries.AnimationController)
@@ -26,19 +26,8 @@ local function requireFresh(Module: ModuleScript)
 	return Result
 end
 
-local function LoadChildren(parent: Instance): {[string]: any}
-	local result = {}
-
-	for _, child in ipairs(parent:GetChildren()) do
-		if child.Name:find("_HotReload") then continue end
-
-		if child:IsA("Folder") then result[child.Name] = LoadChildren(child)
-		elseif child:IsA("ModuleScript") then result[child.Name] = requireFresh(child)
-		else result[child.Name] = child end
-	end
-
-	return result
-end
+local ConfigData
+local AnimationsData = require(WeaponData.Animations)
 
 local function reparent(instance: Instance?, parent: Instance?)
 	if instance and instance.Parent and parent then
@@ -99,36 +88,29 @@ function BaseWeapon:_init()
 	self.WeaponModel = { self.vWeapon }
 	self.Effects = Effects.new(self.WeaponModel)
 
-	local NameValue = Instance.new("StringValue")
-	NameValue.Name = "Name"
-	NameValue.Value = self.Name
-	NameValue.Parent = self.wWeapon
+	self.Config = assert(ConfigData[self.Name], `Missing Config for {self.Name}`)
+	self.Animations = assert(AnimationsData[self.Name], `Missing Animations for {self.Name}`)
 
-	for DataType, Module in pairs(LoadChildren(WeaponAssets.Data)) do
-		self[DataType] = Module[self.Name]
-	end
-
-	if self.Sounds then
-		local Sounds = {}
-		for Name, SoundData in self.Sounds do
-			Sounds[Name] = self._trove:Add(SoundController.new(SoundData, nil, Name))
+	self.Sounds = {}
+	local weaponSounds = WeaponData.Sounds:FindFirstChild(self.Name)
+	local soundSources = weaponSounds and weaponSounds:GetChildren() or {}
+	for _, source in soundSources do
+		if source:IsA("Sound") and not rawget(self.Sounds, source.Name) then
+			self.Sounds[source.Name] = self._trove:Add(SoundController.new(source, nil, source.Name))
 		end
-		self.Sounds = Sounds
 	end
 
-	if self.Animations then
-		local Animations = {}
-		for Name, Data in self.Animations do
-			local Animation
-			if #Data == 3 then
-				Animation = AnimationController.new(Data[1], Data[2], Data[3])
-			else
-				Animation = AnimationController.new(Data[1], Data[3], Data[4], Data[2])
-			end
-			Animations[Name] = self._trove:Add(Animation)
+	local Animations = {}
+	for Name, Data in self.Animations do
+		local Animation
+		if #Data == 3 then
+			Animation = AnimationController.new(Data[1], Data[2], Data[3])
+		else
+			Animation = AnimationController.new(Data[1], Data[3], Data[4], Data[2])
 		end
-		self.Animations = Animations
+		Animations[Name] = self._trove:Add(Animation)
 	end
+	self.Animations = Animations
 
 	for _, Name in self.Behaviors do
 		local Behavior = require(script.Parent.Behaviors:WaitForChild(Name))
@@ -141,18 +123,37 @@ function BaseWeapon:_init()
 	self:_KeybindSetup()
 end
 
+function BaseWeapon.ReloadConfig()
+	ConfigData = requireFresh(WeaponData.Config)
+end
+
+BaseWeapon.ReloadConfig()
+
+function BaseWeapon:NewActionToken()
+	self.ActionGeneration += 1
+	return self.ActionGeneration
+end
+
+function BaseWeapon:IsActionCurrent(token)
+	return not self.Destroyed and self.ActionGeneration == token
+end
+
+function BaseWeapon:CancelActions()
+	self.ActionGeneration += 1
+end
+
 function BaseWeapon.new(opts)
 	local context = opts.Context or {}
-	local Character = context.Character or (context.Player or Player).Character or (context.Player or Player).CharacterAdded:Wait()
+	local player = context.Player or Player
+	local character = context.Character or player.Character or player.CharacterAdded:Wait()
 
 	return setmetatable({
-		Player = context.Player or Player,
-		Character = Character,
-		HRP = Character:WaitForChild("HumanoidRootPart"),
+		Player = player,
+		Character = character,
+		HRP = character:WaitForChild("HumanoidRootPart"),
 		ViewModel = context.ViewModel,
 		Movement = context.Movement,
 		Camera = context.Camera,
-		Physics = context.Physics,
 		PlayerEffects = context.PlayerEffects,
 		Projectile = context.Projectile,
 
@@ -160,11 +161,8 @@ function BaseWeapon.new(opts)
 		wWeapon = opts.WeaponModel,
 		Binds = opts.Binds or {},
 		Behaviors = opts.Behaviors or {},
-		States = {
-			Equipped = false,
-			Equipping = false,
-		},
 		Enabled = true,
+		ActionGeneration = 0,
 	}, BaseWeapon)
 end
 
@@ -174,18 +172,9 @@ end
 
 function BaseWeapon:_CanEquip()
 	return not self.Destroyed
-		and self.Character
 		and self.Character:IsDescendantOf(game)
-		and self.HRP
-		and self.HRP:IsDescendantOf(self.Character)
-		and self.ViewModel
-		and self.ViewModel.IsAlive
 		and self.ViewModel:IsAlive()
-		and self.Movement
 		and self.Movement.Ready
-		and self.Movement.SetWeight
-		and self.wWeapon
-		and self.vWeapon
 end
 
 function BaseWeapon:ToggleView(isFirstPerson: boolean)
@@ -203,6 +192,7 @@ function BaseWeapon:_Equip()
 	if not self:_CanEquip() then
 		return false
 	end
+	self:CancelActions()
 
 	reparent(self.wWeapon, self.Character)
 	self.Movement:SetWeight(self.Config.EQUIP_LOAD)
@@ -240,31 +230,26 @@ function BaseWeapon:_Equip()
 end
 
 function BaseWeapon:_Unequip()
+	self:CancelActions()
 	reparent(self.wWeapon, Player:FindFirstChild("Hotbar"))
 	reparent(self.vWeapon, Player:FindFirstChild("vHotbar"))
 
-	if self.ViewModel and self.ViewModel.IsAlive and self.ViewModel:IsAlive() then
+	if self.ViewModel:IsAlive() then
 		self.ViewModel:Unequip()
 	end
 
-	if self.Effects then
-		self.Effects:RemoveAll()
-	end
+	self.Effects:RemoveAll()
 
 	self._trove:Remove(self.KeyBegan)
 	self._trove:Remove(self.KeyEnded)
-	self._trove:Remove(self.CamState)
-
-	if self.Movement then
-		self.Movement:SetWeight(1)
-	end
+	self.Movement:SetWeight(1)
 end
 
 function BaseWeapon:Destroy()
 	if self.Destroyed then return end
 
+	self:Unequip(true)
 	self.Destroyed = true
-	self:_Unequip()
 	self._trove:Destroy()
 end
 

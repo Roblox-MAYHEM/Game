@@ -126,6 +126,20 @@ return {
 		CATEGORY = "Hitscan",
 		DESCRIPTION = "",
 	},
+
+	["RPG"] = {
+		NAME = "RPG",
+		THUMBNAIL = "",
+		CATEGORY = "Projectile",
+		DESCRIPTION = "A light explosive launcher built for movement combos.",
+	},
+
+	["HandCannon"] = {
+		NAME = "Hand Cannon",
+		THUMBNAIL = "",
+		CATEGORY = "Projectile",
+		DESCRIPTION = "A heavy single-shot launcher with strong recoil.",
+	},
 	
 	["Revolver"] = {
 		NAME = "Revolver",

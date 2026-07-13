@@ -23,7 +23,7 @@ function Weapon.new(WeaponModel, player)
 	setmetatable(self, Weapon)
 
 	self.AttackInfo = self.Config.Attack
-	self.HeavyAttacking = false
+	self.ActiveContact = false
 	self.SwingIndex = 1
 	self.AttackValidator = MeleeValidator.new(self.Character, {
 		Window = self.AttackInfo.WINDOW,
@@ -37,16 +37,15 @@ function Weapon.new(WeaponModel, player)
 end
 
 function Weapon:CanUnequip()
-	return not self.HeavyAttacking
+	return not self.ActiveContact
 end
 
 function Weapon:_SwingInfo(index: number)
-	local swings = self.AttackInfo.SWINGS
-	return (swings and swings[index]) or self.AttackInfo
+	return self.AttackInfo.SWINGS[index]
 end
 
 function Weapon:_ConfigureValidator(info)
-	local cfg = self.AttackValidator.cfg
+	local cfg = self.AttackValidator.Config
 	cfg.Window = info.WINDOW or self.AttackInfo.WINDOW
 	cfg.Range = info.RANGE or self.AttackInfo.RANGE
 	cfg.Arc = info.ARC or self.AttackInfo.ARC
@@ -61,13 +60,13 @@ function Weapon:AttackStart(swingIndex)
 
 	self.AttackToken = token
 	self.SwingIndex = index
-	self.HeavyAttacking = true
+	self.ActiveContact = true
 	self:_ConfigureValidator(info)
 	self.AttackValidator:BeginAttack()
 
-	task.delay(info.TIME or self.AttackInfo.TIME, function()
+	task.delay(info.HIT_TIME or self.AttackInfo.HIT_TIME, function()
 		if self.AttackToken ~= token then return end
-		self.HeavyAttacking = false
+		self.ActiveContact = false
 		self.AttackValidator:EndAttack()
 	end)
 
@@ -105,10 +104,11 @@ function Weapon:Equip()
 	self:_Equip()
 end
 
-function Weapon:Unequip()
-	if not self:CanUnequip() then return false end
+function Weapon:Unequip(force: boolean?)
+	if not force and not self:CanUnequip() then return false end
 
 	self.AttackToken = nil
+	self.ActiveContact = false
 	self.SwingIndex = 1
 	self.AttackValidator:Cleanup()
 	self:_Unequip()

@@ -3,6 +3,7 @@ local Teams 	= game:GetService("Teams")
 local Players 	= game:GetService("Players")
 
 local Events	= ReplicatedStorage.Events
+local DamageHandler = require(script.Parent.Parent.Weapon.Modules.DamageHandler)
 
 local canDeploy = false
 
@@ -127,14 +128,12 @@ function module.ResetAllPlayers()
 
 	for _, plr : Player in pairs(Players:GetPlayers()) do
 		if plr.Character then
-			plr.Character:SetAttribute("Deployed", false)
+			local character = plr.Character
+			plr:SetAttribute("Deployed", false)
+			character:SetAttribute("Deployed", false)
+			DamageHandler.ClearCharacter(character)
 
-			local humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
-			if humanoid then
-				humanoid.Health = 0
-			end
-
-			Events.PlayerKill:FireClient(plr, plr, plr)
+			character:Destroy()
 			Events.EnableMenu:FireClient(plr)
 		end
 	end
@@ -193,6 +192,7 @@ function module.DeployPlayer(plr : Player)
 		humanoid.Died:Once(function()
 			DeployedPlayers[plr] = nil
 			plr:SetAttribute("Deployed", false)
+			character:SetAttribute("Deployed", false)
 		end)
 	end
 

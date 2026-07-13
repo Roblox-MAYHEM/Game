@@ -1,14 +1,3 @@
---[[
-Weapon.new(Config) -- Initializes values
-Weapon:[_Behavior Name Here_]() -- Runs Weapon
-Weapon:Unequip() -- When tool has been unequipped
-
-Behaviors will perform certain weapon-specific moves.
-Modularized for easier reuse and combination.
-]]
-
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
 local WeaponSystem = script.Parent.Parent
 local Modules = WeaponSystem.Modules
 
@@ -18,7 +7,7 @@ local MeleeValidator = require(Modules.MeleeValidator)
 
 local BaseWeapon = require(WeaponSystem.BaseWeapon)
 
-local Weapon = setmetatable({}, {__index = BaseWeapon})
+local Weapon = setmetatable({}, { __index = BaseWeapon })
 Weapon.__index = Weapon
 
 function Weapon.new(WeaponModel : Model, player : Player)
@@ -45,7 +34,7 @@ end
 
 function Weapon:_SetCollision(val : boolean)
 	for _, v in self.Character:GetChildren() do
-		if v:isA("BasePart") then
+		if v:IsA("BasePart") then
 			v.CollisionGroup = val and "Players" or "NoCollision"
 		end
 	end
@@ -79,6 +68,7 @@ function Weapon:Equip()
 end
 
 function Weapon:Unequip()
+	self:CancelLunge()
 	self:_Unequip()
 end
 

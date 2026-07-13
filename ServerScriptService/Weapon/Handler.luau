@@ -63,20 +63,19 @@ local function getHotbarFolder(player: Player): Folder
 	return Hotbar :: Folder
 end
 
+local function clearWeapons(info)
+	for _, Weapon in pairs(info.Hotbar) do
+		Weapon:Destroy()
+	end
+	info.Hotbar = {}
+	info.EquippedWeapon = nil
+end
+
 local function cleanupPlayerWeapons(player: Player, destroyFolder: boolean)
 	local info = PlayerInfo[player]
 	if not info then return end
 
-	if info.EquippedWeapon then
-		info.EquippedWeapon:Unequip()
-	end
-
-	for _, Weapon in pairs(info.Hotbar) do
-		Weapon:Destroy()
-	end
-
-	info.Hotbar = {}
-	info.EquippedWeapon = nil
+	clearWeapons(info)
 	if destroyFolder then
 		info.Character = nil
 	end
@@ -107,7 +106,7 @@ local function canUseWeapon(player: Player): boolean
 end
 
 local function getWeaponSlotCost(weaponName: string): number
-	local weaponConfig = require(ConfigModule)[weaponName]
+	local weaponConfig = BaseWeapon.GetConfig(weaponName)
 	local cost = weaponConfig and weaponConfig.SLOT_COST
 	return if typeof(cost) == "number" then math.clamp(cost, 1, 3) else 1
 end
@@ -176,17 +175,7 @@ function WeaponSystem._CreateHotbar(player: Player)
 	if not info then return end
 
 	getHotbarFolder(player)
-
-	if info.EquippedWeapon then
-		info.EquippedWeapon:Unequip()
-		info.EquippedWeapon = nil
-	end
-
-	for _, Weapon in pairs(info.Hotbar) do
-		Weapon:Destroy()
-	end
-
-	info.Hotbar = {}
+	clearWeapons(info)
 
 	local savedHotbar = DataManager.GetData(player, { "Hotbar" })
 	if typeof(savedHotbar) ~= "table" then
@@ -217,7 +206,6 @@ function WeaponSystem._ReloadHotbar(player: Player)
 	end
 
 	local equippedName = info.EquippedWeapon and info.EquippedWeapon.Name
-	cleanupPlayerWeapons(player, false)
 	WeaponSystem._CreateHotbar(player)
 	getHotbarFolder(player):SetAttribute(CONFIG_REVISION_ATTRIBUTE, ConfigModule:GetAttribute(CONFIG_REVISION_ATTRIBUTE))
 
@@ -228,13 +216,6 @@ function WeaponSystem._ReloadHotbar(player: Player)
 		if not Weapon.Equipped then
 			info.EquippedWeapon = nil
 		end
-	end
-end
-
-function WeaponSystem._UnequipWeapon(player: Player)
-	local info = PlayerInfo[player]
-	if info and info.EquippedWeapon then
-		info.EquippedWeapon:Unequip()
 	end
 end
 
@@ -297,6 +278,14 @@ end
 function WeaponSystem:Init(_Properties)
 	BaseWeapon.SetContext(_Properties)
 	Remotes.EditHotbar.OnServerEvent:Connect(WeaponSystem._EditHotbar)
+	Remotes.WeaponEvent.OnServerEvent:Connect(function(player, callback, ...)
+		if callback == "Shoot" or typeof(callback) ~= "string" or not canUseWeapon(player) then return end
+		local weapon = getEquippedWeapon(player)
+		local method = weapon and weapon[callback]
+		if method and weapon.Character == player.Character then
+			method(weapon, ...)
+		end
+	end)
 
 	local Projectile = _Properties.Projectile
 	assert(Projectile, "WeaponSystem requires Projectile runtime")
@@ -328,6 +317,7 @@ function WeaponSystem:Init(_Properties)
 
 	if RunService:IsStudio() and not configReloadConnection then
 		configReloadConnection = ConfigModule:GetAttributeChangedSignal(CONFIG_REVISION_ATTRIBUTE):Connect(function()
+			BaseWeapon.ReloadConfig()
 			for _, player in ipairs(Players:GetPlayers()) do
 				WeaponSystem._ReloadHotbar(player)
 			end

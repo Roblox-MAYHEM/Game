@@ -50,12 +50,18 @@ end
 function Weapon:AttackStart()
 	self.CurrentMode = "Attack"
 	self.AttackValidator:BeginAttack()
+	task.delay(self.AttackInfo.HIT_TIME, function()
+		if self.CurrentMode == "Attack" then self.AttackValidator:EndAttack() end
+	end)
 	return true
 end
 
 function Weapon:Lunge()
 	self.CurrentMode = "Lunge"
 	self.LungeValidator:BeginAttack()
+	task.delay(self.LungeInfo.HIT_TIME, function()
+		if self.CurrentMode == "Lunge" then self.LungeValidator:EndAttack() end
+	end)
 	return true
 end
 

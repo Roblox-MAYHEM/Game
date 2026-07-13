@@ -1,23 +1,12 @@
---[[
-self.new(Config) -- Initializes values
-self:[_Behavior Name Here_]() -- Runs self
-self:Unequip() -- When tool has been unequipped
-
-selfs will perform certain self-specific moves.
-Also fires events to server.
-]]
-
-
-local Player 			= game:GetService("Players").LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Client = game:GetService("StarterPlayer")
-
 
 local Remotes = ReplicatedStorage.Events
 local Bindables = Client.Bindables
 
 local FastCast = require(ReplicatedStorage.Packages.FastCastRedux)
 local ProjectileUtils = require(ReplicatedStorage.Utils.ProjectileUtils)
+local BaseWeapon = require(script.Parent.Parent.BaseWeapon)
 
 local RangedBehavior = {}
 
@@ -111,7 +100,7 @@ function RangedBehavior.__init(self)
 	self.ReloadInfo = self.Config.Reload
 
 	self.canShoot = false
-	self.CAN_CANCEL_RELOAD = (self.ReloadInfo.CAN_CANCEL ~= nil) and self.ReloadInfo.CAN_CANCEL or true
+	self.CAN_CANCEL_RELOAD = self.ReloadInfo.CAN_CANCEL ~= false
 
 	local ammoVal = self._trove:Construct(Instance, "IntValue")
 	ammoVal.Name = "Ammo"
@@ -141,16 +130,17 @@ function RangedBehavior.__init(self)
 		self:UpdateSpread()
 	end)
 
-	self._BaseEquip = self._Equip -- very hacky way to extend the base equip function
-	self._BaseUnequip = self._Unequip
 end
 
 function RangedBehavior:_Equip()
-	if not self:_BaseEquip() then
+	if not BaseWeapon._Equip(self) then
 		return false
 	end
 
-	task.delay(self.ShootInfo.FIRE_DELAY, function() self.canShoot = true end)
+	local generation = self.ActionGeneration
+	task.delay(self.ShootInfo.FIRE_DELAY, function()
+		if self:IsActionCurrent(generation) then self.canShoot = true end
+	end)
 	return true
 end
 
@@ -280,7 +270,7 @@ function RangedBehavior:_ShootOnce(cooldownOverride: number?) : boolean?
 
 	Bindables.Shoot:Fire()
 
-	self:_PlayShootSound()
+	self.Sounds.Shoot:Play()
 	self:_ApplyRecoil()
 	self:_PlayShootAnimation()
 
@@ -303,7 +293,6 @@ function RangedBehavior:_ShootOnce(cooldownOverride: number?) : boolean?
 	self:_ApplyKnockback()
 
 	if self.ShootInfo.MUZZLE_FLASH then
-		-- Fixed: Access index 1 of the table for the direction
 		local flashDir = type(directions) == "table" and directions[1] or directions
 		self.PlayerEffects.PlayEffect("MuzzleFlash", self.ViewModel.Weapon.Shoot, flashDir)
 	end
@@ -362,12 +351,6 @@ function RangedBehavior:_ApplyRecoil()
 	self.ViewModel:AdjustSpring("recoil", recoil)
 end
 
-function RangedBehavior:_PlayShootSound()
-	if self.Sounds.Shoot then
-		self.Sounds.Shoot:Play()
-	end
-end
-
 function RangedBehavior:_PlayShootAnimation()
 	if self.States.Fanning and self.Animations.FanFire then
 		self.Animations.FanFire:Play()
@@ -383,12 +366,9 @@ function RangedBehavior:_GetShotPattern(): (Vector3, {Vector3})
 	local origin = shootPart.Position
 	local headPos = self.Character.Head.Position
 
-	-- 1. Wall-clip check (reuse your existing logic)
 	local params = RaycastParams.new()
 	params.FilterType = Enum.RaycastFilterType.Exclude
 	params.FilterDescendantsInstances = { self.Character, self.ViewModel.ViewModel }
-	print(filter)
-
 
 	if workspace:Raycast(headPos, origin - headPos, params) then
 		origin = headPos
@@ -401,8 +381,6 @@ function RangedBehavior:_GetShotPattern(): (Vector3, {Vector3})
 	local spreadDegrees = self:UpdateSpread()
 	local spreadRad = math.rad(spreadDegrees)
 
-	-- 2. Generate the Conic Pattern
-	-- If only 1 pellet, just fire straight
 	if pelletCount <= 1 then
 		table.insert(pelletDirections, baseDirection)
 		return origin, pelletDirections
@@ -447,7 +425,6 @@ function RangedBehavior:UpdateSpread()
 	return spread
 end
 
--- Helper: Handle automatic reloading
 function RangedBehavior:_HandleAutoReload()
 	if self.Mag.Value <= 0 then
 		self.canShoot = false
@@ -463,31 +440,23 @@ end
 
 function RangedBehavior:_CancelReload()
 	self.States.Reloading = false
-	if self.Sounds.Reload then self.Sounds.Reload:Stop() end
+	self.Sounds.Reload:Stop()
 end
 
 function RangedBehavior:_ReloadOnce()
 	if self.States.Reloading or not self:_CanReload() then return end
 	self.States.Reloading = true
 
-	if self.Sounds.Reload then
-		self.Sounds.Reload:Play()
-	end
-
-	if self.Animations.Reload then
-		self.Animations.Reload:Play()
-		self.Animations.Reload.Stopped:Wait()
-	else
-		task.wait(self.ReloadInfo.TIME or 0)
-	end
+	self.Sounds.Reload:Play()
+	self.Animations.Reload:Play()
+	self.Animations.Reload.Stopped:Wait()
 
 	if not self.States.Reloading then return end
 
-	-- how much to reload
-	local max_ammo = self.ShootInfo.MAX_AMMO
+	local maxAmmo = self.ShootInfo.MAX_AMMO
 	local ammo = self.Ammo.Value
 	local mag = self.Mag.Value
-	local need = max_ammo - ammo
+	local need = maxAmmo - ammo
 
 	if need > 0 and mag > 0 then
 		local take
@@ -501,7 +470,6 @@ function RangedBehavior:_ReloadOnce()
 		self.Ammo.Value = ammo + take
 	end
 
-	-- cooldown between reload steps
 	task.wait(self.ReloadInfo.DELAY or 0)
 end
 
@@ -549,8 +517,10 @@ function RangedBehavior:ExitADS()
 end
 
 function RangedBehavior:_Unequip()
-	self:_BaseUnequip()
-
+	self:StopShooting()
+	self.canShoot = false
+	self.States.Shooting = false
+	BaseWeapon._Unequip(self)
 	self:_CancelReload()
 end
 

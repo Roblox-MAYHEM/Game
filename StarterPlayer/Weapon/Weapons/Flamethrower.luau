@@ -1,29 +1,12 @@
---[[
-Weapon.new(Config) -- Initializes values
-Weapon:[_Behavior Name Here_]() -- Runs Weapon
-Weapon:Unequip() -- When tool has been unequipped
-
-Weapons will perform certain weapon-specific moves.
-Also fires events to server.
-]]
-
-
-local RunService		= game:GetService("RunService")
+local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Client = game:GetService("StarterPlayer")
 
-local WeaponSystem 		= script.Parent.Parent
-local Libraries 	= Client.Libraries
-local Remotes 		= ReplicatedStorage.Events
-local Bindables		= Client.Bindables
-local WeaponAssets 	= ReplicatedStorage.Assets.Weapons
-local Packages = ReplicatedStorage.Packages
+local WeaponSystem = script.Parent.Parent
+local Remotes = ReplicatedStorage.Events
 
-local Trove = require(Packages.Trove)
 local BaseWeapon = require(WeaponSystem.BaseWeapon)
 
--- Weapon Class
-local Weapon = setmetatable({}, {__index = BaseWeapon})
+local Weapon = setmetatable({}, { __index = BaseWeapon })
 Weapon.__index = Weapon
 
 Weapon.Binds = {
@@ -83,12 +66,8 @@ function Weapon:Equip()
 	self.Effects:Play("Held")
 
 	self.States.Equipping = true
-	if self.Animations.Equip then
-		self.Animations.Equip:Play()
-		self.Animations.Equip.Stopped:Wait()
-	else
-		task.wait(self.Config.Equip.TIME)
-	end
+	self.Animations.Equip:Play()
+	self.Animations.Equip.Stopped:Wait()
 
 	if not self.States.Equipping then return end
 	self.States.Equipping = false
@@ -110,7 +89,7 @@ function Weapon:_UpdateFlames(dt)
 
 	if self.Timers.UpdateServer >= self.BurnInfo.UPDATE_SERVER then
 		--Fires V_Weapon shoot's CFrame
-		Remotes.WeaponEvent:FireServer("UpdateFlames", self.WeaponModel[1].Shoot.CFrame) -- TODO: Flamethrower doesn't have Shoot
+		Remotes.WeaponEvent:FireServer("UpdateFlames", self.WeaponModel[1].Shoot.CFrame)
 		self.Timers.UpdateServer = 0
 	end
 
@@ -152,9 +131,8 @@ function Weapon:EndFlames()
 end
 
 function Weapon:Unequip()
-	self:_Unequip() --calls weapon base
-	
 	self:EndFlames()
+	self:_Unequip()
 	
 	self.States.Equipping = false
 	self.States.Equipped = false

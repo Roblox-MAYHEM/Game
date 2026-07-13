@@ -1,29 +1,8 @@
---[[
-Weapon.new(Config) -- Initializes values
-Weapon:[_Behavior Name Here_]() -- Runs Weapon
-Weapon:Unequip() -- When tool has been unequipped
-
-Weapons will perform certain weapon-specific moves.
-Also fires events to server.
-]]
-
-
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Client = game:GetService("StarterPlayer")
-
-local WeaponSystem 		= script.Parent.Parent
-local Libraries 	= Client.Libraries
-local Remotes 		= ReplicatedStorage.Events
-local Bindables		= Client.Bindables
-local WeaponAssets 	= ReplicatedStorage.Assets.Weapons
-
-local Fusion = require(Client.Packages.Fusion)
-local peek = Fusion.peek
+local WeaponSystem = script.Parent.Parent
 
 local BaseWeapon = require(WeaponSystem.BaseWeapon)
 
--- Weapon Class
-local Weapon = setmetatable({}, {__index = BaseWeapon})
+local Weapon = setmetatable({}, { __index = BaseWeapon })
 Weapon.__index = Weapon
 
 Weapon.Binds = {
@@ -68,12 +47,8 @@ function Weapon:Equip()
 	self.Movement:SetDoubleJumps(1)
 
 	self.States.Equipping = true
-	if self.Animations.Equip then
-		self.Animations.Equip:Play()
-		self.Animations.Equip.Stopped:Wait()
-	else
-		task.wait(self.Config.Equip.TIME)
-	end
+	self.Animations.Equip:Play()
+	self.Animations.Equip.Stopped:Wait()
 
 	if not self.States.Equipping then return end
 	self.States.Equipping = false

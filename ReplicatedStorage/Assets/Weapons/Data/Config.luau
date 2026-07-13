@@ -117,7 +117,7 @@ return {
 			RESET_RECOIL 		= .2,
 			RECOIL_DAMPENER	 	= 1,
 
-			KNOCKBACK			= 30,
+			KNOCKBACK			= 45,
 			KNOCK_DIST			= 9,
 			KNOCK_HIT			= 0.8,
 
@@ -497,14 +497,16 @@ return {
 			SCALE		= .5,
 		},
 		["Glide"] = {
-			LAUNCH_VELOCITY = 25,
-			COOLDOWN = .5,
-			POP_SPEED          = 30,     -- upward Δv when opening
-			OPEN_RAMP_TAU      = 0.10,   -- seconds – how quickly drag ramps up
-			CLOSE_RAMP_TAU     = 0.12,   -- seconds – how quickly drag ramps down
-			K_OPEN             = 0.10,   -- quadratic drag coefficient (accel form)
-			K_CLOSED           = 0.00,   -- drag while closed (normally 0)
-			GRAVITY_SCALE_OPEN = 0.55,   -- 1 = normal gravity, lower = floatier
+			COOLDOWN = 0.5,
+			CATCH_RATIO = 0.7,
+			CATCH_MAX = 22,
+			OPEN_RAMP_TAU = 0.10,
+			CLOSE_RAMP_TAU = 0.12,
+			K_OPEN = 0.075,
+			K_CLOSED = 0,
+			GRAVITY_SCALE_OPEN = 0.55,
+			HORIZONTAL_FREE_SPEED = 70,
+			HORIZONTAL_DRAG = 0.015,
 		},
 		["Lunge"] = {
 			DMG = 60,
@@ -514,8 +516,8 @@ return {
 
 			ACTIVE_TIME = .2,	
 			OPEN_TIME = .1,
-			FORWARD_VELOCITY = 20,
-			UP_VELOCITY = 3,
+			FORWARD_GAIN = 18,
+			FORWARD_CAP = 42,
 			COOLDOWN = 1.5,
 
 			WINDOW = 4,
@@ -528,6 +530,8 @@ return {
 			HITBOX_OFFSET = CFrame.new(0, 0, -6),
 			HIT_BOOST = 5,
 			HIT_BOOST_CAP = 36,
+			HIT_LIFT_GAIN = 7,
+			HIT_LIFT_CAP = 24,
 		}
 	},
 
@@ -642,8 +646,10 @@ return {
 			TILT		= 0,
 		},
 		["Attack"] = {
-			TIME = .6,
-			COOLDOWN = .6,
+			TIME = .45,
+			HIT_DELAY = .12,
+			HIT_TIME = .16,
+			COOLDOWN = .15,
 			DMG = 10,
 			IMPACT_POWER = 16,
 			FINISHER_MULTIPLIER = 1.25,
@@ -661,21 +667,16 @@ return {
 		},
 		["Windup"] = {
 			TIME = 1,
-			COOLDOWN = 2,
-			MAX = 90,
-			RATE = 0.1,
 		},
 		["Special"] = {
 			BASE_DMG = 80,
 			BASE_IMPACT = 24,
-			IMPACT_CHARGE_MULT = 0.1,
 			FINISHER_MULTIPLIER = 1.5,
 			FINISHER_Y = 20,
-			DURATION = 1,
-			COOLDOWN = 5, --1.5
-			WIND_MULT = 0.5,
-			TIME = 2,
-			HIT_TIME = 0.75,
+			COOLDOWN = 1.5,
+			TIME = .8,
+			HIT_DELAY = .38,
+			HIT_TIME = .2,
 		}
 	},
 
@@ -691,6 +692,8 @@ return {
 		},
 		["Attack"] = {
 			TIME = 0.35,
+			HIT_DELAY = 0.06,
+			HIT_TIME = 0.18,
 			COOLDOWN = 0.15,
 			DMG = 15,
 			WINDOW = 1,
@@ -708,10 +711,10 @@ return {
 			HIT_BOOST_CAP = 38,
 		},
 		["Lunge"] = {
-			TIME = 0.8,
-			HIT_TIME = 0.55,
+			TIME = 0.65,
+			HIT_DELAY = 0.1,
+			HIT_TIME = 0.3,
 			COOLDOWN = 0.45,
-			COMBO_WINDOW = 0.25,
 			DMG = 30,
 			WINDOW = 1.1,
 			RANGE = 45,
@@ -719,11 +722,17 @@ return {
 			HIT_DEBOUNCE = 0.12,
 			LOS = true,
 			FLOAT_VELOCITY = Vector3.new(0, 16, 0),
-			FORWARD_VELOCITY = 26,
+			FORWARD_GAIN = 16,
+			FORWARD_CAP = 40,
 			GRIP_OUT = CFrame.new(0, 0, -0.75),
 			IMPACT_POWER = 18,
 			FINISHER_MULTIPLIER = 1.15,
 			FINISHER_Y = 10,
+			HITBOX_SHAPE = "Block",
+			HITBOX_SIZE = Vector3.new(8, 7, 17),
+			HITBOX_OFFSET = CFrame.new(0, 0, -8),
+			HIT_BOOST = 7,
+			HIT_BOOST_CAP = 40,
 		},
 	},
 

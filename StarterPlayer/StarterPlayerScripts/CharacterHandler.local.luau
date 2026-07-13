@@ -69,6 +69,10 @@ local function cleanupCurrent(reason: string)
 	end
 end
 
+Remotes.EnableMenu.OnClientEvent:Connect(function()
+	cleanupCurrent("Returned to menu")
+end)
+
 Remotes.PlayerKill.OnClientEvent:Connect(function(killer: Player, killed: Player)
 	if killed ~= Player then return end
 

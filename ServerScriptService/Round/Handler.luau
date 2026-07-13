@@ -12,6 +12,7 @@ local Trove    = require(Packages.Trove)
 
 local LoadMap  = require(script.Parent:WaitForChild("LoadMap"))
 local Deploy   = require(script.Parent:WaitForChild("DeploySystem"))
+local DamageHandler = require(script.Parent.Parent.Weapon.Modules.DamageHandler)
 
 local Replica = require(SS.Libraries.ReplicaServer) 
 local RoundWriteLib = Packages.Replica.RoundStateWrite
@@ -153,6 +154,7 @@ end
 
 function module:Init()
 	Deploy:Init()
+	DamageHandler.SetScoringEnabled(false)
 
 	initRoundReplica()
 
@@ -179,6 +181,7 @@ function module.Intermission()
 	if not enoughPlayers() then return Promise.resolve() end
 
 	Deploy.DisableDeploy()
+	DamageHandler.SetScoringEnabled(false)
 	Deploy.ClearDeployedPlayers()
 
 	roundReplica:Write("Apply", {
@@ -275,6 +278,7 @@ function module.StartRound(modeId: string?)
 
 	return Promise.delay(Config.COUNTDOWN_TIME)
 		:andThen(function()
+			DamageHandler.SetScoringEnabled(true)
 			roundReplica:Write("Apply", {
 				active = true,
 				phase = "Round",
@@ -290,6 +294,7 @@ function module.StartRound(modeId: string?)
 		end)
 		:andThen(function(winnerTeam: Team?)
 			Deploy.DisableDeploy()
+			DamageHandler.SetScoringEnabled(false)
 
 			roundReplica:Write("Apply", {
 				active = true,
@@ -308,9 +313,11 @@ function module.StartRound(modeId: string?)
 			return Promise.delay(Config.DISPLAY_WINNER_TIME)
 		end)
 		:catch(function(err)
+			DamageHandler.SetScoringEnabled(false)
 			warn(("[Round] StartRound error (%s): %s"):format(tostring(modeId), tostring(err)))
 		end)
 		:finally(function()
+			DamageHandler.SetScoringEnabled(false)
 			module.CurrentGamemode = nil
 
 			roundReplica:Write("Apply", {

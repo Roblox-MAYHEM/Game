@@ -183,6 +183,15 @@ function ImpactService.GetRecentAttacker(targetCharacter: Model): Player?
 	return if attacker and attacker.Parent == Players then attacker else nil
 end
 
+function ImpactService.Clear(character: Model)
+	if not character then return end
+	states[character] = nil
+	character:SetAttribute("Impact", 0)
+	character:SetAttribute("ImpactPrimed", false)
+	character:SetAttribute("ImpactPips", 0)
+	character:SetAttribute("ImpactProtected", false)
+end
+
 RunService.Heartbeat:Connect(function(dt)
 	local now = time()
 
