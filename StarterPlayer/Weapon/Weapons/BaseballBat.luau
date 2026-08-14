@@ -79,14 +79,14 @@ function Weapon:Equip()
 	self.Animations.Idle:Play()
 end
 
-function Weapon:_FinishHit(token, info, serverAction: string?)
+function Weapon:_FinishHit(action, info, serverAction: string?)
 	task.wait(info.HIT_DELAY)
-	if not self:IsActionCurrent(token) then return false end
+	if self.Action ~= action then return false end
 
 	if serverAction then Remotes.WeaponEvent:FireServer(serverAction) end
 	self.Hitbox:HitStart(info.HIT_TIME)
 	task.wait(info.HIT_TIME)
-	if not self:IsActionCurrent(token) then return false end
+	if self.Action ~= action then return false end
 
 	self.Hitbox:HitStop()
 	self.Effects:Play("DisableTrail")
@@ -96,20 +96,24 @@ end
 function Weapon:Attack()
 	if not self.States.Equipped or self.States.Attacking or self.States.Windup or self.States.Special then return end
 
-	local token = self:NewActionToken()
+	local action = {}
+	self.Action = action
 	self.States.Attacking = true
 	self.Animations.Attack1:Stop()
 	self.Animations.Attack2:Stop()
 	self.Animations[math.random(2) == 1 and "Attack1" or "Attack2"]:Play()
-	self.Sounds.Swing:Play()
+	if self.Sounds.Swing then self.Sounds.Swing:Play() end
 	self.Effects:Play("EnableTrail")
 
 	task.spawn(function()
-		if not self:_FinishHit(token, self.AttackInfo, "AttackStart") then return end
+		if not self:_FinishHit(action, self.AttackInfo, "AttackStart") then return end
 		task.wait(math.max(self.AttackInfo.TIME - self.AttackInfo.HIT_DELAY - self.AttackInfo.HIT_TIME, 0))
-		if not self:IsActionCurrent(token) then return end
+		if self.Action ~= action then return end
 		task.wait(self.AttackInfo.COOLDOWN)
-		if self:IsActionCurrent(token) then self.States.Attacking = false end
+		if self.Action == action then
+			self.Action = nil
+			self.States.Attacking = false
+		end
 	end)
 end
 
@@ -127,22 +131,26 @@ end
 function Weapon:Special()
 	if not self.States.Windup then return end
 
-	local token = self:NewActionToken()
+	local action = {}
+	self.Action = action
 	self.States.Windup = false
 	self.States.Special = true
 	self.Animations.Windup:Stop()
 	self.Animations.WindupIdle:Stop()
 	self.Animations.Special:Play()
-	self.Sounds.Swing:Play()
+	if self.Sounds.Swing then self.Sounds.Swing:Play() end
 	self.Effects:Play("EnableTrail")
 	Remotes.WeaponEvent:FireServer("Special")
 
 	task.spawn(function()
-		if not self:_FinishHit(token, self.SpecialInfo, "SpecialStart") then return end
+		if not self:_FinishHit(action, self.SpecialInfo, "SpecialStart") then return end
 		task.wait(math.max(self.SpecialInfo.TIME - self.SpecialInfo.HIT_DELAY - self.SpecialInfo.HIT_TIME, 0))
-		if not self:IsActionCurrent(token) then return end
+		if self.Action ~= action then return end
 		task.wait(self.SpecialInfo.COOLDOWN)
-		if self:IsActionCurrent(token) then self.States.Special = false end
+		if self.Action == action then
+			self.Action = nil
+			self.States.Special = false
+		end
 	end)
 end
 
@@ -157,6 +165,7 @@ end
 function Weapon:Unequip()
 	self:_CancelWindup()
 	self:_Unequip()
+	self.Action = nil
 	self.States.Equipping = false
 	self.States.Equipped = false
 	self.States.Attacking = false

@@ -13,6 +13,7 @@ local AnimationController = require(StarterPlayer.Libraries.AnimationController)
 local Frame = require(script.Parent.Frame)
 local Locomotion = require(script.Parent.Locomotion)
 local Cast = require(script.Parent.RaycastModule)
+local SpeedLines = require(script.Parent.SpeedLines)
 
 local Data = script.Parent.Data
 local ConfigModule = Data.Config
@@ -163,56 +164,20 @@ function Movement:SetWeight(weight)
 end
 
 function Movement:_HandleLanding()
-	local landing = self.Config.Ground.HardLanding
-	local downSpeed = self.PeakDownwardSpeed or 0
+	local landing = self.Config.Landing
 	self.PeakDownwardSpeed = 0
-	if downSpeed < landing.MinDownSpeed then return end
-
-	local alpha = math.clamp(
-		(downSpeed - landing.MinDownSpeed) / math.max(landing.MaxDownSpeed - landing.MinDownSpeed, 0.01),
-		0,
-		1
-	)
-	local buffered = self.SpaceBufferedUntil >= time()
-	local responseScale = buffered and landing.BufferedJumpScale or 1
-	local shock = alpha * responseScale
-	self.LandingShockStrength = shock
-	self.LandingShockUntil = time() + landing.ShockDuration
-
-	if shock > 0 then
-		self.Camera:CameraShake(
-			"ShakeOnce",
-			landing.CameraMagnitude * shock,
-			landing.CameraRoughness,
-			0,
-			landing.CameraFadeOut,
-			Vector3.new(0.15, 0.7, 0.15),
-			Vector3.new(0.65, 0.2, 0.35)
-		)
-		self.ViewModel:AdjustSpring("gunSpring", Vector3.new(0, -landing.ViewmodelKick * shock, 0))
-	end
-
 	local velocity = self.Frame.MoveVelocity
-	local speed = velocity.Magnitude
-	if speed > 0.1 then
-		local bleed = math.lerp(landing.MinBleed, landing.MaxBleed, alpha) * responseScale
-		self:ApplyImpulse(-velocity.Unit, speed * bleed)
-		if not buffered then
-			self.LandingCarryDirection = velocity.Unit
-			self.LandingCarryUntil = time() + landing.SlideDuration * math.lerp(0.65, 1, alpha)
-		end
-	end
+	if velocity.Magnitude <= 0.1 then return end
+	self.LandingDirection = velocity.Unit
+	self.LandingSpeed = velocity.Magnitude * landing.Carry
+	self.LandingCarryUntil = time() + landing.Time
+	print("Landing", velocity.Magnitude, self.LandingSpeed)
 end
 
-function Movement:GetLandingShock()
-	local remaining = (self.LandingShockUntil or 0) - time()
-	if remaining <= 0 then return 0 end
-	local duration = self.Config.Ground.HardLanding.ShockDuration
-	return (self.LandingShockStrength or 0) * math.clamp(remaining / math.max(duration, 0.01), 0, 1)
-end
-
-function Movement:TryVault()
+function Movement:TryVault(auto)
 	if self.ActiveAction or not self.Frame.Grounded or time() < (self.VaultCooldownUntil or 0) then return false end
+	local config = self.Config.Actions.Vault
+	if auto and self.Frame.MoveVelocity.Magnitude < config.AutoSpeed then return false end
 	local direction = self.Frame.WorldWishDir
 	if direction == Vector3.zero and self.Frame.MoveVelocity.Magnitude > 0.1 then
 		direction = self.Frame.MoveVelocity.Unit
@@ -220,12 +185,9 @@ function Movement:TryVault()
 	if direction == Vector3.zero then return false end
 
 	local result = Cast:VaultCheck(direction)
-	if not result then return false end
-	self.VaultCooldownUntil = time() + self.Config.Actions.Vault.Cooldown
-	return self:StartAction("Vault", {
-		Direction = direction,
-		TooClose = result.TooClose,
-	})
+	if not result or result.Height > config.Height then return false end
+	self.VaultCooldownUntil = time() + config.Cooldown
+	return self:StartAction("Vault", { Direction = direction })
 end
 
 function Movement:TryWallRun()
@@ -254,14 +216,25 @@ function Movement:TryJump()
 		end
 		return false
 	end
+	if now < (self.WallJumpUntil or 0) then
+		self:ApplyImpulse(self.WallJumpNormal, self.Config.Actions.WallRun.JumpStrength)
+		self:ApplyImpulse(self.CM.UpDirection, self.Config.Actions.WallRun.JumpStrength)
+		self.WallJumpUntil = 0
+		self.JumpCooldownUntil = now + self.Config.Jump.Cooldown
+		return true
+	end
 	if self.ActiveAction then return false end
 
 	local grounded = self.Frame.Grounded or now - self.Frame.LastGroundedAt <= self.Config.Movement.CoyoteTime
 	if not grounded and self.AirJumps >= self.MaxAirJumps then return false end
 	if not grounded then self.AirJumps += 1 end
 
-	self:ApplyImpulse(self.CM.UpDirection, self.Config.Jump.Strength)
-	self.JumpCooldownUntil = now + self.Config.Jump.Cooldown
+	local config = self.Config.Jump
+	if self.Frame.Grounded then
+		self:Boost(self.Frame.MoveVelocity, config.Boost, config.MaxSpeed)
+	end
+	self:ApplyImpulse(self.CM.UpDirection, config.Strength)
+	self.JumpCooldownUntil = now + config.Cooldown
 	return true
 end
 
@@ -300,9 +273,7 @@ function Movement:ApplyKnockback(packet)
 	if direction.Magnitude <= 0.001 or strength <= 0 then return end
 
 	self:ApplyImpulse(direction, strength)
-	if mode == "Push" then
-		self.PushGripUntil = time() + (data.Duration or 0.14)
-	else
+	if mode ~= "Push" then
 		self:StartAction("Knockback", data)
 	end
 end
@@ -317,13 +288,19 @@ function Movement:_UpdateFacing()
 end
 
 function Movement:_UpdatePresentation()
-	local ground = self.Config.Ground
-	local spread = ground.BulletSpread * math.clamp(
-		self.Frame.MoveVelocity.Magnitude / math.max(self.Config.Ground.MoveSpeed, 0.01),
+	local velocity = self.HRP.AssemblyLinearVelocity
+	local speed = Vector3.new(velocity.X, 0, velocity.Z).Magnitude
+	local camera = workspace.CurrentCamera
+	if camera then
+		self.SpeedLines:Update(camera, speed)
+		self.Camera:SetFOVBoost(math.clamp(speed / 2, 0, 20))
+	end
+
+	local spread = math.clamp(
+		self.Frame.MoveVelocity.Magnitude / math.max(self.Config.Ground.Speed, 0.01),
 		0,
 		1
 	)
-	spread += ground.HardLanding.ShockSpread * self:GetLandingShock()
 	if math.abs(spread - self.CurrentSpread) > 0.001 then
 		self.CurrentSpread = spread
 		self.SpreadChanged:Fire(spread)
@@ -363,6 +340,7 @@ function Movement:_UpdatePresentation()
 	else
 		self.state = "Running"
 	end
+	self.ViewModel:SetRunning(self.state == "Running")
 end
 
 function Movement:Update(dt)
@@ -393,6 +371,9 @@ function Movement:Update(dt)
 
 	if not self.ActiveAction then
 		self:TryWallRun()
+		if not self.ActiveAction and self.Frame.Grounded and self.Frame.WorldWishDir ~= Vector3.zero then
+			self:TryVault(true)
+		end
 	end
 
 	if not self.ActiveAction then self.Locomotion:Update(dt) end
@@ -407,6 +388,8 @@ function Movement:SetEnabled(enabled)
 		self:StopAction("Disabled")
 		self.CM.MovingDirection = Vector3.zero
 		self.CM.BaseMoveSpeed = 0
+		self.SpeedLines.Emitter.Enabled = false
+		self.Camera:SetFOVBoost(0)
 	end
 end
 
@@ -466,11 +449,10 @@ function Movement:Init(props)
 	self.JumpCooldownUntil = 0
 	self.VaultCooldownUntil = 0
 	self.WallRunCooldownUntil = 0
-	self.PushGripUntil = 0
+	self.WallJumpUntil = 0
 	self.LandingCarryUntil = 0
-	self.LandingCarryDirection = Vector3.zero
-	self.LandingShockStrength = 0
-	self.LandingShockUntil = 0
+	self.LandingDirection = Vector3.zero
+	self.LandingSpeed = 0
 	self.PeakDownwardSpeed = 0
 	self.LastTiltSign = 0
 	self.CurrentSpread = 0
@@ -480,6 +462,7 @@ function Movement:Init(props)
 	self.GroundController.GroundOffset = 2
 	humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
 	loadPresentation(self, trove)
+	self.SpeedLines = trove:Add(SpeedLines.new(StarterPlayer.Assets:WaitForChild("SpeedLines")))
 
 	trove:Connect(RunService.RenderStepped, function(dt) self:Update(dt) end)
 	trove:Connect(UserInputService.JumpRequest, function()
@@ -496,6 +479,7 @@ end
 
 function Movement:Destroy()
 	self:StopAction("Destroyed")
+	if self.Camera then self.Camera:SetFOVBoost(0) end
 	if self.trove then self.trove:Destroy() end
 	Cast:Destroy()
 	self.Ready = false

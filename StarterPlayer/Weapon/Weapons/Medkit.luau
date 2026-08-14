@@ -136,7 +136,8 @@ function Weapon:Throw()
 	if Cooldown.get("Throw") then return end
 
 	self.States.Throwing = true
-	local token = self:NewActionToken()
+	local action = {}
+	self.ThrowAction = action
 	self.Animations.Throw:Play()
 
 	local shootPoint = self.WeaponModel[1].Primary:FindFirstChild("ShootPoint")
@@ -152,7 +153,8 @@ function Weapon:Throw()
 
 	task.spawn(function()
 		self.Animations.Throw.Stopped:Wait()
-		if not self:IsActionCurrent(token) then return end
+		if self.ThrowAction ~= action then return end
+		self.ThrowAction = nil
 		self.States.Throwing = false
 		Cooldown.set("Throw", self.ThrowInfo.COOLDOWN)
 		self:_SetWeaponVis(true)
@@ -161,8 +163,11 @@ end
 
 function Weapon:Unequip()
 	self:_Unequip()
+	self.ThrowAction = nil
 	self.States.Equipping = false
 	self.States.Equipped = false
+	self.States.Throwing = false
+	self:_SetWeaponVis(true)
 
 	for _, v in pairs(self.Animations) do
 		if v.IsPlaying then

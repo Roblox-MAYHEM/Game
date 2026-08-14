@@ -1,0 +1,2504 @@
+{
+  "name": "game",
+  "className": "DataModel",
+  "children": [
+    {
+      "name": "StarterPlayer",
+      "className": "StarterPlayer",
+      "pluginManaged": true,
+      "children": [
+        {
+          "name": "StarterPlayerScripts",
+          "className": "StarterPlayerScripts",
+          "pluginManaged": true,
+          "children": [
+            {
+              "name": "CharacterHandler",
+              "className": "LocalScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/StarterPlayer/StarterPlayerScripts/CharacterHandler.local.luau"
+              ]
+            },
+            {
+              "name": "Initializer",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/StarterPlayer/StarterPlayerScripts/Initializer.luau"
+              ]
+            },
+            {
+              "name": "HeadSync",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/StarterPlayer/StarterPlayerScripts/HeadSync.luau"
+              ]
+            },
+            {
+              "name": "Weapon",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/StarterPlayer/StarterPlayerScripts/Weapon.luau"
+              ]
+            },
+            {
+              "name": "Movement",
+              "className": "Folder",
+              "pluginManaged": true,
+              "children": [
+                {
+                  "name": "RaycastModule",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/StarterPlayerScripts/Movement/RaycastModule/init.luau"
+                  ],
+                  "children": [
+                    {
+                      "name": "CastVisuals",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/StarterPlayerScripts/Movement/RaycastModule/CastVisuals.luau"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Frame",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/StarterPlayerScripts/Movement/Frame.luau"
+                  ]
+                },
+                {
+                  "name": "Locomotion",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/StarterPlayerScripts/Movement/Locomotion.luau"
+                  ]
+                },
+                {
+                  "name": "Handler",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/StarterPlayerScripts/Movement/Handler.luau"
+                  ]
+                },
+                {
+                  "name": "Data",
+                  "className": "Folder",
+                  "pluginManaged": true,
+                  "children": [
+                    {
+                      "name": "Animations",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/StarterPlayerScripts/Movement/Data/Animations.luau"
+                      ]
+                    },
+                    {
+                      "name": "Sounds",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/StarterPlayerScripts/Movement/Data/Sounds.luau"
+                      ]
+                    },
+                    {
+                      "name": "Config",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/StarterPlayerScripts/Movement/Data/Config.luau"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Actions",
+                  "className": "Folder",
+                  "pluginManaged": true,
+                  "children": [
+                    {
+                      "name": "Vault",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/StarterPlayerScripts/Movement/Actions/Vault.luau"
+                      ]
+                    },
+                    {
+                      "name": "WallRun",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/StarterPlayerScripts/Movement/Actions/WallRun.luau"
+                      ]
+                    },
+                    {
+                      "name": "Knockback",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/StarterPlayerScripts/Movement/Actions/Knockback.luau"
+                      ]
+                    },
+                    {
+                      "name": "Lunge",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/StarterPlayerScripts/Movement/Actions/Lunge.luau"
+                      ]
+                    },
+                    {
+                      "name": "Stomp",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/StarterPlayerScripts/Movement/Actions/Stomp.luau"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Camera",
+              "className": "Folder",
+              "pluginManaged": true,
+              "children": [
+                {
+                  "name": "Handler",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/StarterPlayerScripts/Camera/Handler.luau"
+                  ]
+                },
+                {
+                  "name": "CameraShaker",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/StarterPlayerScripts/Camera/CameraShaker/init.luau"
+                  ],
+                  "children": [
+                    {
+                      "name": "CameraShakeInstance",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/StarterPlayerScripts/Camera/CameraShaker/CameraShakeInstance.luau"
+                      ]
+                    },
+                    {
+                      "name": "CameraShakePresets",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/StarterPlayerScripts/Camera/CameraShaker/CameraShakePresets.luau"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "PlayerEffects",
+              "className": "Folder",
+              "pluginManaged": true,
+              "children": [
+                {
+                  "name": "Handler",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/StarterPlayerScripts/PlayerEffects/Handler.luau"
+                  ]
+                },
+                {
+                  "name": "Effects",
+                  "className": "Folder",
+                  "pluginManaged": true,
+                  "children": [
+                    {
+                      "name": "Explosion2Effect",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/StarterPlayerScripts/PlayerEffects/Effects/Explosion2Effect/init.luau"
+                      ]
+                    },
+                    {
+                      "name": "MuzzleFlash",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/StarterPlayerScripts/PlayerEffects/Effects/MuzzleFlash.luau"
+                      ]
+                    },
+                    {
+                      "name": "HealEffect",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/StarterPlayerScripts/PlayerEffects/Effects/HealEffect.luau"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Projectile",
+              "className": "Folder",
+              "pluginManaged": true,
+              "children": [
+                {
+                  "name": "Handler",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/StarterPlayerScripts/Projectile/Handler.luau"
+                  ]
+                },
+                {
+                  "name": "Visuals",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/StarterPlayerScripts/Projectile/Visuals.luau"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "StarterCharacterScripts",
+          "className": "StarterCharacterScripts",
+          "pluginManaged": true,
+          "children": [
+            {
+              "name": "Animate",
+              "className": "LocalScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/StarterPlayer/StarterCharacterScripts/Animate.local.luau"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Libraries",
+          "className": "Folder",
+          "pluginManaged": true,
+          "children": [
+            {
+              "name": "AnimationController",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/StarterPlayer/Libraries/AnimationController.luau"
+              ]
+            },
+            {
+              "name": "ViewmodelController",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/StarterPlayer/Libraries/ViewmodelController/init.luau"
+              ],
+              "children": [
+                {
+                  "name": "CreateRig",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/Libraries/ViewmodelController/CreateRig.luau"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "SoundController",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/StarterPlayer/Libraries/SoundController.luau"
+              ]
+            },
+            {
+              "name": "UIBootstrap",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/StarterPlayer/Libraries/UIBootstrap.luau"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Weapon",
+          "className": "Folder",
+          "pluginManaged": true,
+          "children": [
+            {
+              "name": "BaseWeapon",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/StarterPlayer/Weapon/BaseWeapon.luau"
+              ]
+            },
+            {
+              "name": "Weapons",
+              "className": "Folder",
+              "pluginManaged": true,
+              "children": [
+                {
+                  "name": "Pistol",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/Weapon/Weapons/Pistol.luau"
+                  ]
+                },
+                {
+                  "name": "DBShotgun",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/Weapon/Weapons/DBShotgun.luau"
+                  ]
+                },
+                {
+                  "name": "Umbrella",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/Weapon/Weapons/Umbrella/init.luau"
+                  ],
+                  "children": [
+                    {
+                      "name": "Animate",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Weapon/Weapons/Umbrella/Animate.luau"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Flamethrower",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/Weapon/Weapons/Flamethrower.luau"
+                  ]
+                },
+                {
+                  "name": "Dartgun",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/Weapon/Weapons/Dartgun.luau"
+                  ]
+                },
+                {
+                  "name": "Pan",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/Weapon/Weapons/Pan.luau"
+                  ]
+                },
+                {
+                  "name": "RocketLauncher",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/Weapon/Weapons/RocketLauncher.luau"
+                  ]
+                },
+                {
+                  "name": "KBShotgun",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/Weapon/Weapons/KBShotgun.luau"
+                  ]
+                },
+                {
+                  "name": "PumpShotgun",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/Weapon/Weapons/PumpShotgun.luau"
+                  ]
+                },
+                {
+                  "name": "Rock",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/Weapon/Weapons/Rock.luau"
+                  ]
+                },
+                {
+                  "name": "RPG",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/Weapon/Weapons/RPG.luau"
+                  ]
+                },
+                {
+                  "name": "HandCannon",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/Weapon/Weapons/HandCannon.luau"
+                  ]
+                },
+                {
+                  "name": "Revolver",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/Weapon/Weapons/Revolver.luau"
+                  ]
+                },
+                {
+                  "name": "Medkit",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/Weapon/Weapons/Medkit.luau"
+                  ]
+                },
+                {
+                  "name": "GreatSword",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/Weapon/Weapons/GreatSword.luau"
+                  ]
+                },
+                {
+                  "name": "Boots",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/Weapon/Weapons/Boots.luau"
+                  ]
+                },
+                {
+                  "name": "BaseballBat",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/Weapon/Weapons/BaseballBat.luau"
+                  ]
+                },
+                {
+                  "name": "ClassicSword",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/Weapon/Weapons/ClassicSword.luau"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Behaviors",
+              "className": "Folder",
+              "pluginManaged": true,
+              "children": [
+                {
+                  "name": "Ranged",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/Weapon/Behaviors/Ranged.luau"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Modules",
+              "className": "Folder",
+              "pluginManaged": true,
+              "children": [
+                {
+                  "name": "Effects",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/Weapon/Modules/Effects.luau"
+                  ]
+                },
+                {
+                  "name": "ClientHitbox",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/Weapon/Modules/ClientHitbox.luau"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Packages",
+          "className": "Folder",
+          "pluginManaged": true,
+          "children": [
+            {
+              "name": "ReplicaClient",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/StarterPlayer/Packages/ReplicaClient.luau"
+              ]
+            },
+            {
+              "name": "Screen3D",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/StarterPlayer/Packages/Screen3D/init.luau"
+              ],
+              "children": [
+                {
+                  "name": "Component3D",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/Packages/Screen3D/Component3D.luau"
+                  ]
+                },
+                {
+                  "name": "Definitions",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/Packages/Screen3D/Definitions.luau"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Fusion",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/StarterPlayer/Packages/Fusion/init.luau"
+              ],
+              "children": [
+                {
+                  "name": "External",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/Packages/Fusion/External.luau"
+                  ]
+                },
+                {
+                  "name": "ExternalDebug",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/Packages/Fusion/ExternalDebug.luau"
+                  ]
+                },
+                {
+                  "name": "RobloxExternal",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/Packages/Fusion/RobloxExternal.luau"
+                  ]
+                },
+                {
+                  "name": "Types",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterPlayer/Packages/Fusion/Types.luau"
+                  ]
+                },
+                {
+                  "name": "Animation",
+                  "className": "Folder",
+                  "pluginManaged": true,
+                  "children": [
+                    {
+                      "name": "ExternalTime",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Animation/ExternalTime.luau"
+                      ]
+                    },
+                    {
+                      "name": "Spring",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Animation/Spring.luau"
+                      ]
+                    },
+                    {
+                      "name": "Stopwatch",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Animation/Stopwatch.luau"
+                      ]
+                    },
+                    {
+                      "name": "Tween",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Animation/Tween.luau"
+                      ]
+                    },
+                    {
+                      "name": "getTweenDuration",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Animation/getTweenDuration.luau"
+                      ]
+                    },
+                    {
+                      "name": "getTweenRatio",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Animation/getTweenRatio.luau"
+                      ]
+                    },
+                    {
+                      "name": "lerpType",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Animation/lerpType.luau"
+                      ]
+                    },
+                    {
+                      "name": "packType",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Animation/packType.luau"
+                      ]
+                    },
+                    {
+                      "name": "springCoefficients",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Animation/springCoefficients.luau"
+                      ]
+                    },
+                    {
+                      "name": "unpackType",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Animation/unpackType.luau"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Colour",
+                  "className": "Folder",
+                  "pluginManaged": true,
+                  "children": [
+                    {
+                      "name": "Oklab",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Colour/Oklab.luau"
+                      ]
+                    },
+                    {
+                      "name": "sRGB",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Colour/sRGB.luau"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Graph",
+                  "className": "Folder",
+                  "pluginManaged": true,
+                  "children": [
+                    {
+                      "name": "Observer",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Graph/Observer.luau"
+                      ]
+                    },
+                    {
+                      "name": "castToGraph",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Graph/castToGraph.luau"
+                      ]
+                    },
+                    {
+                      "name": "change",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Graph/change.luau"
+                      ]
+                    },
+                    {
+                      "name": "depend",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Graph/depend.luau"
+                      ]
+                    },
+                    {
+                      "name": "evaluate",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Graph/evaluate.luau"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Instances",
+                  "className": "Folder",
+                  "pluginManaged": true,
+                  "children": [
+                    {
+                      "name": "Attribute",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Instances/Attribute.luau"
+                      ]
+                    },
+                    {
+                      "name": "AttributeChange",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Instances/AttributeChange.luau"
+                      ]
+                    },
+                    {
+                      "name": "AttributeOut",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Instances/AttributeOut.luau"
+                      ]
+                    },
+                    {
+                      "name": "Child",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Instances/Child.luau"
+                      ]
+                    },
+                    {
+                      "name": "Children",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Instances/Children.luau"
+                      ]
+                    },
+                    {
+                      "name": "Hydrate",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Instances/Hydrate.luau"
+                      ]
+                    },
+                    {
+                      "name": "New",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Instances/New.luau"
+                      ]
+                    },
+                    {
+                      "name": "OnChange",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Instances/OnChange.luau"
+                      ]
+                    },
+                    {
+                      "name": "OnEvent",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Instances/OnEvent.luau"
+                      ]
+                    },
+                    {
+                      "name": "Out",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Instances/Out.luau"
+                      ]
+                    },
+                    {
+                      "name": "applyInstanceProps",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Instances/applyInstanceProps.luau"
+                      ]
+                    },
+                    {
+                      "name": "defaultProps",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Instances/defaultProps.luau"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Logging",
+                  "className": "Folder",
+                  "pluginManaged": true,
+                  "children": [
+                    {
+                      "name": "formatError",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Logging/formatError.luau"
+                      ]
+                    },
+                    {
+                      "name": "messages",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Logging/messages.luau"
+                      ]
+                    },
+                    {
+                      "name": "parseError",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Logging/parseError.luau"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Memory",
+                  "className": "Folder",
+                  "pluginManaged": true,
+                  "children": [
+                    {
+                      "name": "checkLifetime",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Memory/checkLifetime.luau"
+                      ]
+                    },
+                    {
+                      "name": "deriveScope",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Memory/deriveScope.luau"
+                      ]
+                    },
+                    {
+                      "name": "deriveScopeImpl",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Memory/deriveScopeImpl.luau"
+                      ]
+                    },
+                    {
+                      "name": "doCleanup",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Memory/doCleanup.luau"
+                      ]
+                    },
+                    {
+                      "name": "innerScope",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Memory/innerScope.luau"
+                      ]
+                    },
+                    {
+                      "name": "legacyCleanup",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Memory/legacyCleanup.luau"
+                      ]
+                    },
+                    {
+                      "name": "needsDestruction",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Memory/needsDestruction.luau"
+                      ]
+                    },
+                    {
+                      "name": "poisonScope",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Memory/poisonScope.luau"
+                      ]
+                    },
+                    {
+                      "name": "scopePool",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Memory/scopePool.luau"
+                      ]
+                    },
+                    {
+                      "name": "scoped",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Memory/scoped.luau"
+                      ]
+                    },
+                    {
+                      "name": "whichLivesLonger",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Memory/whichLivesLonger.luau"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "State",
+                  "className": "Folder",
+                  "pluginManaged": true,
+                  "children": [
+                    {
+                      "name": "Computed",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/State/Computed.luau"
+                      ]
+                    },
+                    {
+                      "name": "For",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/State/For/init.luau"
+                      ],
+                      "children": [
+                        {
+                          "name": "Disassembly",
+                          "className": "ModuleScript",
+                          "pluginManaged": true,
+                          "filePaths": [
+                            "c:/Mayhem/StarterPlayer/Packages/Fusion/State/For/Disassembly.luau"
+                          ]
+                        },
+                        {
+                          "name": "ForTypes",
+                          "className": "ModuleScript",
+                          "pluginManaged": true,
+                          "filePaths": [
+                            "c:/Mayhem/StarterPlayer/Packages/Fusion/State/For/ForTypes.luau"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "ForKeys",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/State/ForKeys.luau"
+                      ]
+                    },
+                    {
+                      "name": "ForPairs",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/State/ForPairs.luau"
+                      ]
+                    },
+                    {
+                      "name": "ForValues",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/State/ForValues.luau"
+                      ]
+                    },
+                    {
+                      "name": "Value",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/State/Value.luau"
+                      ]
+                    },
+                    {
+                      "name": "castToState",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/State/castToState.luau"
+                      ]
+                    },
+                    {
+                      "name": "peek",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/State/peek.luau"
+                      ]
+                    },
+                    {
+                      "name": "updateAll",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/State/updateAll.luau"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Utility",
+                  "className": "Folder",
+                  "pluginManaged": true,
+                  "children": [
+                    {
+                      "name": "Contextual",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Utility/Contextual.luau"
+                      ]
+                    },
+                    {
+                      "name": "Safe",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Utility/Safe.luau"
+                      ]
+                    },
+                    {
+                      "name": "isSimilar",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Utility/isSimilar.luau"
+                      ]
+                    },
+                    {
+                      "name": "merge",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Utility/merge.luau"
+                      ]
+                    },
+                    {
+                      "name": "nameOf",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Utility/nameOf.luau"
+                      ]
+                    },
+                    {
+                      "name": "never",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Utility/never.luau"
+                      ]
+                    },
+                    {
+                      "name": "nicknames",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Utility/nicknames.luau"
+                      ]
+                    },
+                    {
+                      "name": "xtypeof",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterPlayer/Packages/Fusion/Utility/xtypeof.luau"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Components",
+          "className": "Folder",
+          "pluginManaged": true,
+          "children": [
+            {
+              "name": "ItemTemplate",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/StarterPlayer/Components/ItemTemplate.luau"
+              ]
+            },
+            {
+              "name": "CrateSpinner",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/StarterPlayer/Components/CrateSpinner.luau"
+              ]
+            },
+            {
+              "name": "HitMarker",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/StarterPlayer/Components/HitMarker.luau"
+              ]
+            },
+            {
+              "name": "HitHighlight",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/StarterPlayer/Components/HitHighlight.luau"
+              ]
+            },
+            {
+              "name": "Draggable",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/StarterPlayer/Components/Draggable.luau"
+              ]
+            },
+            {
+              "name": "DmgMarker",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/StarterPlayer/Components/DmgMarker.luau"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ReplicatedStorage",
+      "className": "ReplicatedStorage",
+      "pluginManaged": true,
+      "children": [
+        {
+          "name": "Settings",
+          "className": "ModuleScript",
+          "pluginManaged": true,
+          "filePaths": [
+            "c:/Mayhem/ReplicatedStorage/Settings.luau"
+          ]
+        },
+        {
+          "name": "Packages",
+          "className": "Folder",
+          "pluginManaged": true,
+          "children": [
+            {
+              "name": "FastCastRedux",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/ReplicatedStorage/Packages/FastCastRedux/init.luau"
+              ],
+              "children": [
+                {
+                  "name": "Table",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ReplicatedStorage/Packages/FastCastRedux/Table.luau"
+                  ]
+                },
+                {
+                  "name": "ActiveCast",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ReplicatedStorage/Packages/FastCastRedux/ActiveCast.luau"
+                  ]
+                },
+                {
+                  "name": "Signal",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ReplicatedStorage/Packages/FastCastRedux/Signal.luau"
+                  ]
+                },
+                {
+                  "name": "TypeDefinitions",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ReplicatedStorage/Packages/FastCastRedux/TypeDefinitions.luau"
+                  ]
+                },
+                {
+                  "name": "TypeMarshaller",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ReplicatedStorage/Packages/FastCastRedux/TypeMarshaller.luau"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "PartCache",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/ReplicatedStorage/Packages/PartCache/init.luau"
+              ],
+              "children": [
+                {
+                  "name": "Table",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ReplicatedStorage/Packages/PartCache/Table.luau"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "ProjectileHitbox",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/ReplicatedStorage/Packages/ProjectileHitbox.luau"
+              ]
+            },
+            {
+              "name": "ShapecastHitbox",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/ReplicatedStorage/Packages/ShapecastHitbox/init.luau"
+              ],
+              "children": [
+                {
+                  "name": "Solvers",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ReplicatedStorage/Packages/ShapecastHitbox/Solvers/init.luau"
+                  ],
+                  "children": [
+                    {
+                      "name": "Bone",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/ReplicatedStorage/Packages/ShapecastHitbox/Solvers/Bone.luau"
+                      ]
+                    },
+                    {
+                      "name": "Raycast",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/ReplicatedStorage/Packages/ShapecastHitbox/Solvers/Raycast.luau"
+                      ]
+                    },
+                    {
+                      "name": "Blockcast",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/ReplicatedStorage/Packages/ShapecastHitbox/Solvers/Blockcast.luau"
+                      ]
+                    },
+                    {
+                      "name": "Attachment",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/ReplicatedStorage/Packages/ShapecastHitbox/Solvers/Attachment.luau"
+                      ]
+                    },
+                    {
+                      "name": "Spherecast",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/ReplicatedStorage/Packages/ShapecastHitbox/Solvers/Spherecast.luau"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Types",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ReplicatedStorage/Packages/ShapecastHitbox/Types.luau"
+                  ]
+                },
+                {
+                  "name": "Hitbox",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ReplicatedStorage/Packages/ShapecastHitbox/Hitbox.luau"
+                  ]
+                },
+                {
+                  "name": "Visualizers",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ReplicatedStorage/Packages/ShapecastHitbox/Visualizers/init.luau"
+                  ],
+                  "children": [
+                    {
+                      "name": "Raycast",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/ReplicatedStorage/Packages/ShapecastHitbox/Visualizers/Raycast.luau"
+                      ]
+                    },
+                    {
+                      "name": "Blockcast",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/ReplicatedStorage/Packages/ShapecastHitbox/Visualizers/Blockcast.luau"
+                      ]
+                    },
+                    {
+                      "name": "Spherecast",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/ReplicatedStorage/Packages/ShapecastHitbox/Visualizers/Spherecast.luau"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Settings",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ReplicatedStorage/Packages/ShapecastHitbox/Settings.luau"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "MiddleClass",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/ReplicatedStorage/Packages/MiddleClass.luau"
+              ]
+            },
+            {
+              "name": "Trove",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/ReplicatedStorage/Packages/Trove.luau"
+              ]
+            },
+            {
+              "name": "Signal",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/ReplicatedStorage/Packages/Signal.luau"
+              ]
+            },
+            {
+              "name": "Promise",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/ReplicatedStorage/Packages/Promise.luau"
+              ]
+            },
+            {
+              "name": "Replica",
+              "className": "Folder",
+              "pluginManaged": true,
+              "children": [
+                {
+                  "name": "RoundStateWrite",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ReplicatedStorage/Packages/Replica/RoundStateWrite.luau"
+                  ]
+                },
+                {
+                  "name": "ReplicaShared",
+                  "className": "Folder",
+                  "pluginManaged": true,
+                  "children": [
+                    {
+                      "name": "Maid",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/ReplicatedStorage/Packages/Replica/ReplicaShared/Maid.luau"
+                      ]
+                    },
+                    {
+                      "name": "RateLimit",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/ReplicatedStorage/Packages/Replica/ReplicaShared/RateLimit.luau"
+                      ]
+                    },
+                    {
+                      "name": "Remote",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/ReplicatedStorage/Packages/Replica/ReplicaShared/Remote.luau"
+                      ]
+                    },
+                    {
+                      "name": "Signal",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/ReplicatedStorage/Packages/Replica/ReplicaShared/Signal.luau"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Utils",
+          "className": "Folder",
+          "pluginManaged": true,
+          "children": [
+            {
+              "name": "Cooldown",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/ReplicatedStorage/Utils/Cooldown.luau"
+              ]
+            },
+            {
+              "name": "Spring",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/ReplicatedStorage/Utils/Spring.luau"
+              ]
+            },
+            {
+              "name": "Metatables",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/ReplicatedStorage/Utils/Metatables.luau"
+              ]
+            },
+            {
+              "name": "DebugVisualize",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/ReplicatedStorage/Utils/DebugVisualize.luau"
+              ]
+            },
+            {
+              "name": "Loader",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/ReplicatedStorage/Utils/Loader.luau"
+              ]
+            },
+            {
+              "name": "DeepCopy",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/ReplicatedStorage/Utils/DeepCopy.luau"
+              ]
+            },
+            {
+              "name": "ProjectileUtils",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/ReplicatedStorage/Utils/ProjectileUtils.luau"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Assets",
+          "className": "Folder",
+          "pluginManaged": true,
+          "children": [
+            {
+              "name": "Crates",
+              "className": "Folder",
+              "pluginManaged": true,
+              "children": [
+                {
+                  "name": "Data",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ReplicatedStorage/Assets/Crates/Data.luau"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Weapons",
+              "className": "Folder",
+              "pluginManaged": true,
+              "children": [
+                {
+                  "name": "List",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ReplicatedStorage/Assets/Weapons/List.luau"
+                  ]
+                },
+                {
+                  "name": "Data",
+                  "className": "Folder",
+                  "pluginManaged": true,
+                  "children": [
+                    {
+                      "name": "Config",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/ReplicatedStorage/Assets/Weapons/Data/Config.luau"
+                      ]
+                    },
+                    {
+                      "name": "Animations",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/ReplicatedStorage/Assets/Weapons/Data/Animations.luau"
+                      ]
+                    },
+                    {
+                      "name": "Info",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/ReplicatedStorage/Assets/Weapons/Data/Info.luau"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "StarterGui",
+          "className": "Folder",
+          "pluginManaged": true,
+          "children": [
+            {
+              "name": "CharHUD",
+              "className": "ScreenGui",
+              "pluginManaged": true,
+              "children": [
+                {
+                  "name": "Handler",
+                  "className": "LocalScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterGui/CharHUD/Handler.local.luau"
+                  ]
+                },
+                {
+                  "name": "Initializer",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterGui/CharHUD/Initializer.luau"
+                  ]
+                },
+                {
+                  "name": "DmgMarker",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterGui/CharHUD/DmgMarker.luau"
+                  ]
+                },
+                {
+                  "name": "Healthbar",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterGui/CharHUD/Healthbar.luau"
+                  ]
+                },
+                {
+                  "name": "Hotbar",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterGui/CharHUD/Hotbar.luau"
+                  ]
+                },
+                {
+                  "name": "ViewportCharacterHandler",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterGui/CharHUD/ViewportCharacterHandler.luau"
+                  ]
+                },
+                {
+                  "name": "Vignette",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterGui/CharHUD/Vignette.luau"
+                  ]
+                },
+                {
+                  "name": "WeaponInfo",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterGui/CharHUD/WeaponInfo.luau"
+                  ]
+                },
+                {
+                  "name": "ImpactDisplay",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterGui/CharHUD/ImpactDisplay.luau"
+                  ]
+                },
+                {
+                  "name": "Cooldown",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterGui/CharHUD/Cooldown.luau"
+                  ]
+                },
+                {
+                  "name": "Utils",
+                  "className": "Folder",
+                  "pluginManaged": true,
+                  "children": [
+                    {
+                      "name": "WeaponObserver",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterGui/CharHUD/Utils/WeaponObserver.luau"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Crosshair",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterGui/CharHUD/Crosshair.luau"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "GlobalUI",
+              "className": "ScreenGui",
+              "pluginManaged": true,
+              "children": [
+                {
+                  "name": "Handler",
+                  "className": "LocalScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterGui/GlobalUI/Handler.local.luau"
+                  ]
+                },
+                {
+                  "name": "ExpFeed",
+                  "className": "Folder",
+                  "pluginManaged": true,
+                  "children": [
+                    {
+                      "name": "Handler",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterGui/GlobalUI/ExpFeed/Handler.luau"
+                      ]
+                    },
+                    {
+                      "name": "ExpPopup",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterGui/GlobalUI/ExpFeed/ExpPopup.luau"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "KillFeed",
+                  "className": "Folder",
+                  "pluginManaged": true,
+                  "children": [
+                    {
+                      "name": "Handler",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterGui/GlobalUI/KillFeed/Handler.luau"
+                      ]
+                    },
+                    {
+                      "name": "KillEntry",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterGui/GlobalUI/KillFeed/KillEntry.luau"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Leaderboard",
+                  "className": "Folder",
+                  "pluginManaged": true,
+                  "children": [
+                    {
+                      "name": "Handler",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterGui/GlobalUI/Leaderboard/Handler.luau"
+                      ]
+                    },
+                    {
+                      "name": "PlayerEntry",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterGui/GlobalUI/Leaderboard/PlayerEntry.luau"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "MainMenu",
+              "className": "ScreenGui",
+              "pluginManaged": true,
+              "children": [
+                {
+                  "name": "Handler",
+                  "className": "LocalScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterGui/MainMenu/Handler.local.luau"
+                  ]
+                },
+                {
+                  "name": "Crates",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterGui/MainMenu/Crates.luau"
+                  ]
+                },
+                {
+                  "name": "Debug",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterGui/MainMenu/Debug.luau"
+                  ]
+                },
+                {
+                  "name": "Loadout",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterGui/MainMenu/Loadout.luau"
+                  ]
+                },
+                {
+                  "name": "MenuHandler",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterGui/MainMenu/MenuHandler.luau"
+                  ]
+                },
+                {
+                  "name": "Shop",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterGui/MainMenu/Shop.luau"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "GameHUD",
+              "className": "ScreenGui",
+              "pluginManaged": true,
+              "children": [
+                {
+                  "name": "Handler",
+                  "className": "LocalScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterGui/GameHUD/Handler.local.luau"
+                  ]
+                },
+                {
+                  "name": "Initializer",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterGui/GameHUD/Initializer.luau"
+                  ]
+                },
+                {
+                  "name": "DeathHandler",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/StarterGui/GameHUD/DeathHandler.luau"
+                  ]
+                },
+                {
+                  "name": "RoundVisuals",
+                  "className": "Folder",
+                  "pluginManaged": true,
+                  "children": [
+                    {
+                      "name": "Handler",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterGui/GameHUD/RoundVisuals/Handler.luau"
+                      ]
+                    },
+                    {
+                      "name": "PlayerCard",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/StarterGui/GameHUD/RoundVisuals/PlayerCard.luau"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Data",
+          "className": "Folder",
+          "pluginManaged": true,
+          "children": [
+            {
+              "name": "LevelProgression",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/ReplicatedStorage/Data/LevelProgression.luau"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ServerScriptService",
+      "className": "ServerScriptService",
+      "pluginManaged": true,
+      "children": [
+        {
+          "name": "Handler",
+          "className": "Script",
+          "pluginManaged": true,
+          "filePaths": [
+            "c:/Mayhem/ServerScriptService/Handler.legacy.luau"
+          ]
+        },
+        {
+          "name": "HeadSync",
+          "className": "ModuleScript",
+          "pluginManaged": true,
+          "filePaths": [
+            "c:/Mayhem/ServerScriptService/HeadSync.luau"
+          ]
+        },
+        {
+          "name": "GameSettings",
+          "className": "ModuleScript",
+          "pluginManaged": true,
+          "filePaths": [
+            "c:/Mayhem/ServerScriptService/GameSettings.luau"
+          ]
+        },
+        {
+          "name": "Initializer",
+          "className": "ModuleScript",
+          "pluginManaged": true,
+          "filePaths": [
+            "c:/Mayhem/ServerScriptService/Initializer.luau"
+          ]
+        },
+        {
+          "name": "Character",
+          "className": "ModuleScript",
+          "pluginManaged": true,
+          "filePaths": [
+            "c:/Mayhem/ServerScriptService/Character.luau"
+          ]
+        },
+        {
+          "name": "Projectile",
+          "className": "ModuleScript",
+          "pluginManaged": true,
+          "filePaths": [
+            "c:/Mayhem/ServerScriptService/Projectile.luau"
+          ]
+        },
+        {
+          "name": "Ringout",
+          "className": "ModuleScript",
+          "pluginManaged": true,
+          "filePaths": [
+            "c:/Mayhem/ServerScriptService/Ringout.luau"
+          ]
+        },
+        {
+          "name": "Data",
+          "className": "Folder",
+          "pluginManaged": true,
+          "children": [
+            {
+              "name": "DataManager",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/ServerScriptService/Data/DataManager.luau"
+              ]
+            },
+            {
+              "name": "Template",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/ServerScriptService/Data/Template.luau"
+              ]
+            },
+            {
+              "name": "Handler",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/ServerScriptService/Data/Handler.luau"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Round",
+          "className": "Folder",
+          "pluginManaged": true,
+          "children": [
+            {
+              "name": "Handler",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/ServerScriptService/Round/Handler.luau"
+              ]
+            },
+            {
+              "name": "DeploySystem",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/ServerScriptService/Round/DeploySystem.luau"
+              ]
+            },
+            {
+              "name": "LoadMap",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/ServerScriptService/Round/LoadMap.luau"
+              ]
+            },
+            {
+              "name": "Gamemodes",
+              "className": "Folder",
+              "pluginManaged": true,
+              "children": [
+                {
+                  "name": "KOTH",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ServerScriptService/Round/Gamemodes/KOTH.luau"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Weapon",
+          "className": "Folder",
+          "pluginManaged": true,
+          "children": [
+            {
+              "name": "Handler",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/ServerScriptService/Weapon/Handler.luau"
+              ]
+            },
+            {
+              "name": "BaseWeapon",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/ServerScriptService/Weapon/BaseWeapon.luau"
+              ]
+            },
+            {
+              "name": "Modules",
+              "className": "Folder",
+              "pluginManaged": true,
+              "children": [
+                {
+                  "name": "Explosion",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ServerScriptService/Weapon/Modules/Explosion.luau"
+                  ]
+                },
+                {
+                  "name": "DamageHandler",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ServerScriptService/Weapon/Modules/DamageHandler.luau"
+                  ]
+                },
+                {
+                  "name": "DamageFalloff",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ServerScriptService/Weapon/Modules/DamageFalloff.luau"
+                  ]
+                },
+                {
+                  "name": "Knockback",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ServerScriptService/Weapon/Modules/Knockback.luau"
+                  ]
+                },
+                {
+                  "name": "Heal",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ServerScriptService/Weapon/Modules/Heal.luau"
+                  ]
+                },
+                {
+                  "name": "ProjectileCaster",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ServerScriptService/Weapon/Modules/ProjectileCaster.luau"
+                  ]
+                },
+                {
+                  "name": "ProjectileValidator",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ServerScriptService/Weapon/Modules/ProjectileValidator.luau"
+                  ]
+                },
+                {
+                  "name": "ImpactService",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ServerScriptService/Weapon/Modules/ImpactService.luau"
+                  ]
+                },
+                {
+                  "name": "MeleeValidator",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ServerScriptService/Weapon/Modules/MeleeValidator.luau"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Weapons",
+              "className": "Folder",
+              "pluginManaged": true,
+              "children": [
+                {
+                  "name": "Pistol",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ServerScriptService/Weapon/Weapons/Pistol.luau"
+                  ]
+                },
+                {
+                  "name": "DBShotgun",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ServerScriptService/Weapon/Weapons/DBShotgun.luau"
+                  ]
+                },
+                {
+                  "name": "Flamethrower",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ServerScriptService/Weapon/Weapons/Flamethrower/init.luau"
+                  ],
+                  "children": [
+                    {
+                      "name": "HitboxCollision",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/ServerScriptService/Weapon/Weapons/Flamethrower/HitboxCollision.luau"
+                      ]
+                    },
+                    {
+                      "name": "StatusBurn",
+                      "className": "ModuleScript",
+                      "pluginManaged": true,
+                      "filePaths": [
+                        "c:/Mayhem/ServerScriptService/Weapon/Weapons/Flamethrower/StatusBurn.luau"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Umbrella",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ServerScriptService/Weapon/Weapons/Umbrella.luau"
+                  ]
+                },
+                {
+                  "name": "Dartgun",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ServerScriptService/Weapon/Weapons/Dartgun.luau"
+                  ]
+                },
+                {
+                  "name": "Pan",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ServerScriptService/Weapon/Weapons/Pan.luau"
+                  ]
+                },
+                {
+                  "name": "BaseballBat",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ServerScriptService/Weapon/Weapons/BaseballBat.luau"
+                  ]
+                },
+                {
+                  "name": "RocketLauncher",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ServerScriptService/Weapon/Weapons/RocketLauncher.luau"
+                  ]
+                },
+                {
+                  "name": "KBShotgun",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ServerScriptService/Weapon/Weapons/KBShotgun.luau"
+                  ]
+                },
+                {
+                  "name": "PumpShotgun",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ServerScriptService/Weapon/Weapons/PumpShotgun.luau"
+                  ]
+                },
+                {
+                  "name": "Rock",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ServerScriptService/Weapon/Weapons/Rock.luau"
+                  ]
+                },
+                {
+                  "name": "RPG",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ServerScriptService/Weapon/Weapons/RPG.luau"
+                  ]
+                },
+                {
+                  "name": "HandCannon",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ServerScriptService/Weapon/Weapons/HandCannon.luau"
+                  ]
+                },
+                {
+                  "name": "Revolver",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ServerScriptService/Weapon/Weapons/Revolver.luau"
+                  ]
+                },
+                {
+                  "name": "Medkit",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ServerScriptService/Weapon/Weapons/Medkit.luau"
+                  ]
+                },
+                {
+                  "name": "ClassicSword",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ServerScriptService/Weapon/Weapons/ClassicSword.luau"
+                  ]
+                },
+                {
+                  "name": "GreatSword",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ServerScriptService/Weapon/Weapons/GreatSword.luau"
+                  ]
+                },
+                {
+                  "name": "Boots",
+                  "className": "ModuleScript",
+                  "pluginManaged": true,
+                  "filePaths": [
+                    "c:/Mayhem/ServerScriptService/Weapon/Weapons/Boots.luau"
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Crate",
+          "className": "Folder",
+          "pluginManaged": true,
+          "children": [
+            {
+              "name": "Handler",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/ServerScriptService/Crate/Handler.luau"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Experience",
+          "className": "Folder",
+          "pluginManaged": true,
+          "children": [
+            {
+              "name": "Handler",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/ServerScriptService/Experience/Handler.luau"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ServerStorage",
+      "className": "ServerStorage",
+      "pluginManaged": true,
+      "children": [
+        {
+          "name": "Libraries",
+          "className": "Folder",
+          "pluginManaged": true,
+          "children": [
+            {
+              "name": "ProfileStore",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/ServerStorage/Libraries/ProfileStore.luau"
+              ]
+            },
+            {
+              "name": "ReplicaServer",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/ServerStorage/Libraries/ReplicaServer.luau"
+              ]
+            },
+            {
+              "name": "LevelSystem",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/ServerStorage/Libraries/LevelSystem.luau"
+              ]
+            },
+            {
+              "name": "PositionHistory",
+              "className": "ModuleScript",
+              "pluginManaged": true,
+              "filePaths": [
+                "c:/Mayhem/ServerStorage/Libraries/PositionHistory.luau"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -34,7 +34,6 @@ function Weapon.new(WeaponModel, player)
 
 	self.AttackInfo = self.Config.Attack
 	self.LungeInfo = self.Config.Lunge
-	self.CurrentMode = "Attack"
 	self.AttackValidator = makeValidator(self.Character, self.AttackInfo)
 	self.LungeValidator = MeleeValidator.new(self.Character, {
 		Window = self.LungeInfo.WINDOW,
@@ -47,27 +46,34 @@ function Weapon.new(WeaponModel, player)
 	return self
 end
 
-function Weapon:AttackStart()
-	self.CurrentMode = "Attack"
-	self.AttackValidator:BeginAttack()
-	task.delay(self.AttackInfo.HIT_TIME, function()
-		if self.CurrentMode == "Attack" then self.AttackValidator:EndAttack() end
+function Weapon:_StartAttack(info, validator)
+	local action = { Info = info, Validator = validator }
+	self.CurrentAction = action
+	validator:BeginAttack()
+	task.delay(info.HIT_TIME, function()
+		if self.CurrentAction == action then
+			self.CurrentAction = nil
+			validator:EndAttack()
+		end
 	end)
+	return action
+end
+
+function Weapon:AttackStart()
+	self:_StartAttack(self.AttackInfo, self.AttackValidator)
 	return true
 end
 
 function Weapon:Lunge()
-	self.CurrentMode = "Lunge"
-	self.LungeValidator:BeginAttack()
-	task.delay(self.LungeInfo.HIT_TIME, function()
-		if self.CurrentMode == "Lunge" then self.LungeValidator:EndAttack() end
-	end)
+	self:_StartAttack(self.LungeInfo, self.LungeValidator)
 	return true
 end
 
 function Weapon:ProcessHit(targetCharacter: Model)
-	local info = if self.CurrentMode == "Lunge" then self.LungeInfo else self.AttackInfo
-	local validator = if self.CurrentMode == "Lunge" then self.LungeValidator else self.AttackValidator
+	local action = self.CurrentAction
+	if not action then return false end
+	local info = action.Info
+	local validator = action.Validator
 
 	local ok = validator:ValidateHit(targetCharacter)
 	if not ok then return false end
@@ -99,7 +105,7 @@ function Weapon:Equip()
 end
 
 function Weapon:Unequip()
-	self.CurrentMode = "Attack"
+	self.CurrentAction = nil
 	self.AttackValidator:Cleanup()
 	self.LungeValidator:Cleanup()
 	self:_Unequip()

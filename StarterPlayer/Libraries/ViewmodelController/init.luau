@@ -15,6 +15,8 @@ local ViewModelController = {}
 ViewModelController.__index = ViewModelController
 
 local ACTION_SWAY = "ACTION_SWAY"
+local RUN_LEFT_C0 = CFrame.Angles(0, 0, math.rad(-55))
+local RUN_RIGHT_C0 = CFrame.Angles(0, 0, math.rad(55))
 
 local DEFAULT_CONFIG = {
 	SCALE = 1,
@@ -57,12 +59,19 @@ function ViewModelController.new(character)
 	local humanoid = character:WaitForChild("Humanoid")
 	local viewModel = CreateRig(character)
 	local vAnimator = viewModel.Humanoid:WaitForChild("Animator")
+	local torso = viewModel.Torso
+	local leftShoulder = torso["Left Shoulder"]
+	local rightShoulder = torso["Right Shoulder"]
 
 	local self = setmetatable({
 		Character = character,
 		Humanoid = humanoid,
 		ViewModel = viewModel,
 		vAnimator = vAnimator,
+		LeftShoulder = leftShoulder,
+		RightShoulder = rightShoulder,
+		LeftShoulderC0 = leftShoulder.C0,
+		RightShoulderC0 = rightShoulder.C0,
 
 		Weapon = nil,
 		Config = table.clone(DEFAULT_CONFIG),
@@ -71,6 +80,8 @@ function ViewModelController.new(character)
 		Equipped = false,
 		Destroyed = false,
 		isAiming = false,
+		Running = false,
+		RunKickUntil = 0,
 		_swayBound = false,
 		_trove = Trove.new(),
 
@@ -82,6 +93,7 @@ function ViewModelController.new(character)
 			recoil = Spring.new(Vector3.zero, Vector3.zero, Vector3.zero, 20, 1),
 			gunSpring = Spring.new(Vector3.zero, Vector3.zero, Vector3.zero, 15, 0.4),
 			bobbing = Spring.new(Vector3.zero, Vector3.zero, Vector3.zero, 50, 1),
+			run = Spring.new(0, 0, 0, 12, 1),
 		},
 		
 		Tilt = {
@@ -199,6 +211,20 @@ function ViewModelController:SetAiming(isAiming)
 	self.Springs.aimLerp.target = isAiming and 1 or 0
 end
 
+function ViewModelController:SetRunning(running)
+	self.Running = running
+	if os.clock() >= self.RunKickUntil then
+		self.Springs.run.target = running and 1 or 0
+	end
+end
+
+function ViewModelController:KickRun()
+	self.RunKickUntil = os.clock() + 2
+	self.Springs.run.p = 0
+	self.Springs.run.v = 0
+	self.Springs.run.target = 0
+end
+
 ViewModelController.aimDownSights = ViewModelController.SetAiming
 
 function ViewModelController:updateClient(dt)
@@ -229,6 +255,7 @@ function ViewModelController:updateClient(dt)
 		or Vector3.zero
 
 	self:ApplyTilt()
+	self.Springs.run.target = self.Running and os.clock() >= self.RunKickUntil and 1 or 0
 
 	dt *= (_G.TimeMult or 1)
 	for _, spring in pairs(self.Springs) do
@@ -247,6 +274,9 @@ function ViewModelController:updateClient(dt)
 	local recoil    = self.Springs.recoil.p
 	local sway      = self.Springs.sway.p
 	local gunSpring = self.Springs.gunSpring.p
+	local run = self.Springs.run.p
+	self.LeftShoulder.C0 = self.LeftShoulderC0:Lerp(self.LeftShoulderC0 * RUN_LEFT_C0, run)
+	self.RightShoulder.C0 = self.RightShoulderC0:Lerp(self.RightShoulderC0 * RUN_RIGHT_C0, run)
 	
 	local recoilCF = CFrame.Angles(math.rad(recoil.X), math.rad(recoil.Y), math.rad(recoil.Z))
 	local tiltCF = CFrame.Angles(0, 0, self.Springs.cameraTilt.p)

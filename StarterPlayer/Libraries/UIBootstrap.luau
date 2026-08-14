@@ -10,10 +10,8 @@ local Replica = require(StarterPlayer.Packages.ReplicaClient)
 local Player = Players.LocalPlayer
 
 local UIBootstrap = {}
-
-local function observeReplicas()
-	local playerReplica = nil
-	local roundReplica = nil
+local playerReplica = nil
+local roundReplica = nil
 
 	Replica.OnNew("PlayerData", function(rep)
 		if rep.Tags.UserId == Player.UserId then
@@ -25,13 +23,14 @@ local function observeReplicas()
 		roundReplica = rep
 	end)
 
-	return function()
-		while not playerReplica or not roundReplica do
-			task.wait()
-		end
+Replica.RequestData()
 
-		return playerReplica, roundReplica
+local function getReplicas()
+	while not playerReplica or not roundReplica do
+		task.wait()
 	end
+
+	return playerReplica, roundReplica
 end
 
 function UIBootstrap.Load(rootScript, options)
@@ -40,7 +39,6 @@ function UIBootstrap.Load(rootScript, options)
 	local ui = rootScript.Parent
 	local trove = Trove.new()
 	local scope = Fusion.scoped(Fusion)
-	local getReplicas = observeReplicas()
 
 	local baseProps = {
 		Player = Player,
@@ -56,8 +54,6 @@ function UIBootstrap.Load(rootScript, options)
 	if options.BeforeReplicas then
 		options.BeforeReplicas(baseProps)
 	end
-
-	Replica.RequestData()
 
 	local props = table.clone(baseProps)
 	props.Replica, props.RoundReplica = getReplicas()

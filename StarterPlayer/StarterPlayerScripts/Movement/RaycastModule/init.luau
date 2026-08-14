@@ -15,7 +15,6 @@ local RaycastModule = {
 	WallLength = 3,
 	BackLength = 6,
 	VaultLength = 10,
-	VaultCloseLength = 3,
 	WallHeights = { -1.0, -0.2, 0.8 },
 	WallInset = 0.75,
 	MaxPierces = 25,
@@ -224,39 +223,25 @@ function RaycastModule:BackCheck(visualize, length)
 end
 
 function RaycastModule:VaultCheck(forwardDir)
-	local direction = forwardDir or self.HRP.CFrame.LookVector
-	local forward = Vector3.new(direction.X, 0, direction.Z)
-	if forward.Magnitude <= 0.001 then return nil, "NoDirection" end
+	local forward = forwardDir or self.HRP.CFrame.LookVector
+	if forward.Magnitude <= 0.001 then return end
 	forward = forward.Unit
 
-	local up = Vector3.yAxis
-	local bodyHit = self:_Cast(
-		self.HRP.Position - up * 0.6,
-		forward * self.VaultLength,
-		false
-	)
+	local ground = self:GroundCheck(false, self.GroundLength + 1.5)
+	local groundY = ground and ground.Position.Y or self.HRP.Position.Y - 3
+	local origin = self.HRP.Position
+	local bodyHit = self:_Cast(Vector3.new(origin.X, groundY + 0.5, origin.Z), forward * self.VaultLength, false)
+		or self:_Cast(Vector3.new(origin.X, groundY + 1.75, origin.Z), forward * self.VaultLength, false)
 	if not bodyHit then return nil, "NoBodyHit" end
 	if blocksVault(bodyHit.Instance) then
 		return nil, "NoVault"
 	end
 
-	local headHit = self:_Cast(
-		self.Head.Position + up,
-		forward * self.VaultLength,
-		false
-	)
-	if headHit then return nil, "HeadBlocked" end
+	local root = obstacleRoot(bodyHit.Instance)
+	local top = self:_Cast(bodyHit.Position - bodyHit.Normal * 0.25 + Vector3.yAxis * 14, -Vector3.yAxis * 18, false)
+	if not top or obstacleRoot(top.Instance) ~= root then return end
 
-	local closeHit = self:_Cast(
-		self.HRP.Position + up * 0.1,
-		forward * self.VaultCloseLength,
-		false
-	)
-
-	return {
-		Part = bodyHit.Instance,
-		TooClose = closeHit ~= nil,
-	}
+	return { Height = top.Position.Y - groundY }
 end
 
 function RaycastModule:Destroy()

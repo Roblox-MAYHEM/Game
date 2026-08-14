@@ -108,7 +108,7 @@ function Weapon:BeginFlames()
 		UpdateServer = 0, -- Time between server updates
 	}
 
-	self.Sounds.Shoot:FadeIn(2)
+	if self.Sounds.Shoot then self.Sounds.Shoot:FadeIn(2) end
 	self.Effects:Play("EnableFlames")
 	self.States.Burning = true
 
@@ -125,7 +125,7 @@ function Weapon:EndFlames()
 	self.BurnInfoLoop:Disconnect()
 	self.States.Burning = false
 	self.Effects:Play("DisableFlames")
-	self.Sounds.Shoot:FadeOut(.5)
+	if self.Sounds.Shoot then self.Sounds.Shoot:FadeOut(.5) end
 
 	Remotes.WeaponEvent:FireServer("ExitFlames")
 end

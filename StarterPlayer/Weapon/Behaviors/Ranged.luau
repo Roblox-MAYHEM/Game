@@ -137,10 +137,7 @@ function RangedBehavior:_Equip()
 		return false
 	end
 
-	local generation = self.ActionGeneration
-	task.delay(self.ShootInfo.FIRE_DELAY, function()
-		if self:IsActionCurrent(generation) then self.canShoot = true end
-	end)
+	task.delay(self.ShootInfo.FIRE_DELAY, function() self.canShoot = true end)
 	return true
 end
 
@@ -259,6 +256,7 @@ end
 function RangedBehavior:_ShootOnce(cooldownOverride: number?) : boolean?
 	if not self.canShoot or self.Ammo.Value <= 0 or self.States.Shooting then return end
 	if not self.ViewModel or not self.ViewModel:IsAlive() or not self.ViewModel.Weapon then return end
+	self.ViewModel:KickRun()
 
 	if self.States.Reloading then
 		if not self.CAN_CANCEL_RELOAD then return end
@@ -270,7 +268,7 @@ function RangedBehavior:_ShootOnce(cooldownOverride: number?) : boolean?
 
 	Bindables.Shoot:Fire()
 
-	self.Sounds.Shoot:Play()
+	if self.Sounds.Shoot then self.Sounds.Shoot:Play() end
 	self:_ApplyRecoil()
 	self:_PlayShootAnimation()
 
@@ -440,14 +438,14 @@ end
 
 function RangedBehavior:_CancelReload()
 	self.States.Reloading = false
-	self.Sounds.Reload:Stop()
+	if self.Sounds.Reload then self.Sounds.Reload:Stop() end
 end
 
 function RangedBehavior:_ReloadOnce()
 	if self.States.Reloading or not self:_CanReload() then return end
 	self.States.Reloading = true
 
-	self.Sounds.Reload:Play()
+	if self.Sounds.Reload then self.Sounds.Reload:Play() end
 	self.Animations.Reload:Play()
 	self.Animations.Reload.Stopped:Wait()
 
@@ -492,6 +490,7 @@ end
 
 
 function RangedBehavior:EnterADS()
+	self.ViewModel:KickRun()
 	self.States.Aiming = true
 	self.Camera:SetFOVZoom(self.Config.AimDownSights.FOV)
 	self.ViewModel:aimDownSights(true)

@@ -218,7 +218,7 @@ function Weapon:BeginGlide()
 		self:EndGlide()
 	end)
 
-	self.Sounds.Open:Play()
+	if self.Sounds.Open then self.Sounds.Open:Play() end
 	self.Animations.Open:Play()
 	self.Open()
 end
@@ -242,7 +242,7 @@ function Weapon:EndGlide(suppressAnim: boolean?)
 	if not suppressAnim then
 		self.Animations.Open:Stop()
 		self.Animations.OpenIdle:Stop()
-		self.Sounds.Close:Play()
+		if self.Sounds.Close then self.Sounds.Close:Play() end
 		self.Close()
 	end
 
@@ -256,7 +256,8 @@ function Weapon:Lunge()
 	if Cooldown.get("Lunge") then return end
 
 	Cooldown.set("Lunge", self.LungeInfo.COOLDOWN)
-	local token = self:NewActionToken()
+	local action = {}
+	self.LungeAction = action
 
 	self.Animations.OpenIdle:Stop()
 	if not self.States.Gliding then
@@ -265,7 +266,7 @@ function Weapon:Lunge()
 
 	self.States.Lunging = true
 	self.Animations.Lunge:Play()
-	self.Sounds.Lunge:Play()
+	if self.Sounds.Lunge then self.Sounds.Lunge:Play() end
 	self.Effects:Play("Lunge")
 
 	self.Movement:StartLunge(workspace.CurrentCamera.CFrame.LookVector, {
@@ -276,13 +277,13 @@ function Weapon:Lunge()
 	})
 
 	task.wait(self.LungeInfo.OPEN_TIME)
-	if not self:IsActionCurrent(token) or not self.States.Lunging then return end
+	if self.LungeAction ~= action or not self.States.Lunging then return end
 
 	Remotes.WeaponEvent:FireServer("Lunge")
 	self.Hitbox:HitStart(self.LungeInfo.ACTIVE_TIME)
 
 	task.wait(self.LungeInfo.ACTIVE_TIME)
-	if self:IsActionCurrent(token) then
+	if self.LungeAction == action then
 		self:CancelLunge()
 	end
 end
@@ -290,6 +291,7 @@ end
 function Weapon:CancelLunge()
 	if not self.States.Lunging then return end
 
+	self.LungeAction = nil
 	self.States.Lunging = false
 	self.Animations.Lunge:Stop()
 	if self.Movement.ActiveAction and self.Movement.ActiveAction.Name == "Lunge" then

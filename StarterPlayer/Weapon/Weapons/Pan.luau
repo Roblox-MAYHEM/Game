@@ -97,7 +97,7 @@ function Weapon:_AttackOnce()
 	Remotes.WeaponEvent:FireServer("AttackStart")
 
 	self:_PlayAttackAnimation()
-	self.Sounds.Swing:Play()
+	if self.Sounds.Swing then self.Sounds.Swing:Play() end
 
 	task.wait(self.AttackInfo.TIME)
 

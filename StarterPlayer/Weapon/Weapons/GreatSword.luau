@@ -81,8 +81,7 @@ function Weapon:Equip()
 	self.Animations.Idle:Play()
 end
 
-function Weapon:_Swing(index: number)
-	local token = self:NewActionToken()
+function Weapon:_Swing(index: number, action)
 	local info = self:_SwingInfo(index)
 	local totalTime = info.TIME or self.AttackInfo.TIME
 	local hitDelay = info.HIT_DELAY or self.AttackInfo.HIT_DELAY or 0
@@ -93,25 +92,25 @@ function Weapon:_Swing(index: number)
 	animation:Play()
 
 	task.wait(hitDelay)
-	if not self:IsActionCurrent(token) then return false end
+	if self.AttackLoop ~= action then return false end
 	self.States.ActiveContact = true
 	Remotes.WeaponEvent:FireServer("AttackStart", index)
 	self.Hitbox:HitStart(hitTime)
 	task.wait(hitTime)
-	if not self:IsActionCurrent(token) then return false end
+	if self.AttackLoop ~= action then return false end
 	self.Hitbox:HitStop()
 	self.States.ActiveContact = false
 
 	local remaining = totalTime - hitDelay - hitTime
 	task.wait(math.max(remaining, 0))
-	if not self:IsActionCurrent(token) then return false end
+	if self.AttackLoop ~= action then return false end
 
 	self.LastSwingTime = tick()
 	return true
 end
 
-function Weapon:_AttackLoop(token)
-	while self.AttackLoop == token
+function Weapon:_AttackLoop(action)
+	while self.AttackLoop == action
 		and self.States.Equipped
 		and not self.States.SpecialCooldown
 		and self.QueuedAttack
@@ -122,20 +121,21 @@ function Weapon:_AttackLoop(token)
 
 		local index = self.ComboStep
 		self.QueuedAttack = false
-		if not self:_Swing(index) then break end
+		if not self:_Swing(index, action) then break end
 
 		if index >= 3 then
 			self.ComboStep = 1
 			self.QueuedAttack = false
 			self.States.SpecialCooldown = true
 			task.wait(self.AttackInfo.SPECIAL_COOLDOWN or 0)
+			if self.AttackLoop ~= action then break end
 			self.States.SpecialCooldown = false
 		else
 			self.ComboStep = index + 1
 		end
 	end
 
-	if self.AttackLoop == token then
+	if self.AttackLoop == action then
 		self.AttackLoop = nil
 	end
 end
@@ -146,10 +146,10 @@ function Weapon:Attack()
 	self.QueuedAttack = true
 
 	if not self.AttackLoop then
-		local token = {}
-		self.AttackLoop = token
+		local action = {}
+		self.AttackLoop = action
 		task.spawn(function()
-			self:_AttackLoop(token)
+			self:_AttackLoop(action)
 		end)
 	end
 end

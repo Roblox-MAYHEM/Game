@@ -15,7 +15,6 @@ function WallRun:Start(movement, data)
 	local config = movement.Config.Actions.WallRun
 	self.Name = "WallRun"
 	self.Side = data.Side
-	self.EndsAt = time() + config.MaxDuration
 	self.VerticalSpeed = math.max(movement.Frame.Velocity:Dot(movement.CM.UpDirection), config.LiftStrength)
 	movement.Humanoid.AutoRotate = false
 
@@ -41,7 +40,10 @@ end
 
 function WallRun:Update(movement, dt)
 	local wall = self:GetWall(movement)
-	if not wall or movement.Frame.Grounded or time() >= self.EndsAt then return false end
+	if not wall or movement.Frame.Grounded then return false end
+	if self.Side == "Left" and movement.Frame.WishDir.X >= 0 then return false end
+	if self.Side == "Right" and movement.Frame.WishDir.X <= 0 then return false end
+	self.WallNormal = wall.Normal
 
 	local config = movement.Config.Actions.WallRun
 	local direction = tangent(wall.Normal, movement.CM.UpDirection, movement.Frame.MoveVelocity)
@@ -62,9 +64,13 @@ function WallRun:Update(movement, dt)
 	return true
 end
 
-function WallRun:Stop(movement, _reason)
+function WallRun:Stop(movement, reason)
 	movement.Humanoid.AutoRotate = true
 	movement.WallRunCooldownUntil = time() + movement.Config.Actions.WallRun.Cooldown
+	if reason ~= "Jumped" and self.WallNormal then
+		movement.WallJumpNormal = self.WallNormal
+		movement.WallJumpUntil = time() + movement.Config.Actions.WallRun.JumpWindow
+	end
 	if movement.Sounds.WallRun then movement.Sounds.WallRun:Stop() end
 end
 

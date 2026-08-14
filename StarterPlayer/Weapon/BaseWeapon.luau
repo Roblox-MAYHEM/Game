@@ -5,7 +5,7 @@ local StarterPlayer = game:GetService("StarterPlayer")
 local Player = game:GetService("Players").LocalPlayer
 
 local WeaponSystem = script.Parent
-local WeaponData = ReplicatedStorage.Assets.Weapons.Data
+local WeaponAssets = ReplicatedStorage.Assets.Weapons
 
 local SoundController = require(StarterPlayer.Libraries.SoundController)
 local AnimationController = require(StarterPlayer.Libraries.AnimationController)
@@ -26,8 +26,19 @@ local function requireFresh(Module: ModuleScript)
 	return Result
 end
 
-local ConfigData
-local AnimationsData = require(WeaponData.Animations)
+local function LoadChildren(parent: Instance): {[string]: any}
+	local result = {}
+
+	for _, child in ipairs(parent:GetChildren()) do
+		if child.Name:find("_HotReload") then continue end
+
+		if child:IsA("Folder") then result[child.Name] = LoadChildren(child)
+		elseif child:IsA("ModuleScript") then result[child.Name] = requireFresh(child)
+		else result[child.Name] = child end
+	end
+
+	return result
+end
 
 local function reparent(instance: Instance?, parent: Instance?)
 	if instance and instance.Parent and parent then
@@ -88,17 +99,15 @@ function BaseWeapon:_init()
 	self.WeaponModel = { self.vWeapon }
 	self.Effects = Effects.new(self.WeaponModel)
 
-	self.Config = assert(ConfigData[self.Name], `Missing Config for {self.Name}`)
-	self.Animations = assert(AnimationsData[self.Name], `Missing Animations for {self.Name}`)
-
-	self.Sounds = {}
-	local weaponSounds = WeaponData.Sounds:FindFirstChild(self.Name)
-	local soundSources = weaponSounds and weaponSounds:GetChildren() or {}
-	for _, source in soundSources do
-		if source:IsA("Sound") and not rawget(self.Sounds, source.Name) then
-			self.Sounds[source.Name] = self._trove:Add(SoundController.new(source, nil, source.Name))
-		end
+	for DataType, Module in pairs(LoadChildren(WeaponAssets.Data)) do
+		self[DataType] = Module[self.Name]
 	end
+
+	local Sounds = {}
+	for Name, SoundData in self.Sounds or {} do
+		Sounds[Name] = self._trove:Add(SoundController.new(SoundData, nil, Name))
+	end
+	self.Sounds = Sounds
 
 	local Animations = {}
 	for Name, Data in self.Animations do
@@ -123,25 +132,6 @@ function BaseWeapon:_init()
 	self:_KeybindSetup()
 end
 
-function BaseWeapon.ReloadConfig()
-	ConfigData = requireFresh(WeaponData.Config)
-end
-
-BaseWeapon.ReloadConfig()
-
-function BaseWeapon:NewActionToken()
-	self.ActionGeneration += 1
-	return self.ActionGeneration
-end
-
-function BaseWeapon:IsActionCurrent(token)
-	return not self.Destroyed and self.ActionGeneration == token
-end
-
-function BaseWeapon:CancelActions()
-	self.ActionGeneration += 1
-end
-
 function BaseWeapon.new(opts)
 	local context = opts.Context or {}
 	local player = context.Player or Player
@@ -162,7 +152,6 @@ function BaseWeapon.new(opts)
 		Binds = opts.Binds or {},
 		Behaviors = opts.Behaviors or {},
 		Enabled = true,
-		ActionGeneration = 0,
 	}, BaseWeapon)
 end
 
@@ -192,8 +181,6 @@ function BaseWeapon:_Equip()
 	if not self:_CanEquip() then
 		return false
 	end
-	self:CancelActions()
-
 	reparent(self.wWeapon, self.Character)
 	self.Movement:SetWeight(self.Config.EQUIP_LOAD)
 
@@ -230,7 +217,6 @@ function BaseWeapon:_Equip()
 end
 
 function BaseWeapon:_Unequip()
-	self:CancelActions()
 	reparent(self.wWeapon, Player:FindFirstChild("Hotbar"))
 	reparent(self.vWeapon, Player:FindFirstChild("vHotbar"))
 

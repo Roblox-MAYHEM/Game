@@ -160,9 +160,3 @@ Player.CharacterAdded:Connect(onCharacterAdded)
 if Player.Character then
 	task.spawn(onCharacterAdded, Player.Character)
 end
-
-local UserInputService = game:GetService("UserInputService")
-local DebugVisualize = require(ReplicatedStorage.Utils.DebugVisualize)
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-	if input.KeyCode==Enum.KeyCode.T then DebugVisualize.step() end
-end)

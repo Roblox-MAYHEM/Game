@@ -106,7 +106,7 @@ local function canUseWeapon(player: Player): boolean
 end
 
 local function getWeaponSlotCost(weaponName: string): number
-	local weaponConfig = BaseWeapon.GetConfig(weaponName)
+	local weaponConfig = require(ConfigModule)[weaponName]
 	local cost = weaponConfig and weaponConfig.SLOT_COST
 	return if typeof(cost) == "number" then math.clamp(cost, 1, 3) else 1
 end
@@ -278,15 +278,6 @@ end
 function WeaponSystem:Init(_Properties)
 	BaseWeapon.SetContext(_Properties)
 	Remotes.EditHotbar.OnServerEvent:Connect(WeaponSystem._EditHotbar)
-	Remotes.WeaponEvent.OnServerEvent:Connect(function(player, callback, ...)
-		if callback == "Shoot" or typeof(callback) ~= "string" or not canUseWeapon(player) then return end
-		local weapon = getEquippedWeapon(player)
-		local method = weapon and weapon[callback]
-		if method and weapon.Character == player.Character then
-			method(weapon, ...)
-		end
-	end)
-
 	local Projectile = _Properties.Projectile
 	assert(Projectile, "WeaponSystem requires Projectile runtime")
 
@@ -317,7 +308,6 @@ function WeaponSystem:Init(_Properties)
 
 	if RunService:IsStudio() and not configReloadConnection then
 		configReloadConnection = ConfigModule:GetAttributeChangedSignal(CONFIG_REVISION_ATTRIBUTE):Connect(function()
-			BaseWeapon.ReloadConfig()
 			for _, player in ipairs(Players:GetPlayers()) do
 				WeaponSystem._ReloadHotbar(player)
 			end

@@ -43,13 +43,6 @@ return {
 		SLOT_COST = 3,
 	},
 	
-	["Illumina"] = {
-		NAME = "Illumina",
-		THUMBNAIL = "http://www.roblox.com/asset/?id=17288527826",
-		CATEGORY = "Melee",
-		DESCRIPTION = "",
-	},
-
 	["Pan"] = {
 		NAME = "Pan",
 		THUMBNAIL = "https://www.roblox.com/asset-thumbnail/image?assetId=102978828422766&width=420&height=420&format=png",

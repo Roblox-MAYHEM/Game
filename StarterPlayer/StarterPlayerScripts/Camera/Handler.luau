@@ -111,7 +111,8 @@ function CameraController:Init(Properties)
 
 	self.CameraShaker = CameraShakeController.new(self.ShakePriority, UpdateShake)
 	self.BaseFOV = Camera.FieldOfView
-	self.CurrentFOV = Camera.FieldOfView
+	self.ZoomFOV = Camera.FieldOfView
+	self.FOVBoost = 0
 	self.CameraDirection = Vector3.new()
 	self.CurrentCamState = nil
 	self.RotationDisabled = true
@@ -167,7 +168,13 @@ function CameraController:EnableRotation()
 end
 
 function CameraController:SetFOVZoom(FOV: number)
-	self.FOVSpring.target = FOV
+	self.ZoomFOV = FOV
+	self.FOVSpring.target = self.ZoomFOV + self.FOVBoost
+end
+
+function CameraController:SetFOVBoost(FOV: number)
+	self.FOVBoost = FOV
+	self.FOVSpring.target = self.ZoomFOV + self.FOVBoost
 end
 
 function CameraController:CreatePivot(endCF: CFrame, tweenInfo: TweenInfo)

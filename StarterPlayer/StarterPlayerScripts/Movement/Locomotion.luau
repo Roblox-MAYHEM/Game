@@ -21,41 +21,19 @@ function Locomotion:Update(dt: number)
 	if frame.Grounded then
 		local ground = movement.GroundController
 		local running = config.Ground
-		local shock = movement:GetLandingShock()
 		movement.CM.ActiveController = ground
-		ground.AccelerationTime = running.AccelerationTime * math.lerp(
-			1,
-			running.HardLanding.ShockAccelerationMultiplier,
-			shock
-		)
-		ground.DecelerationTime = running.DecelerationTime
-		ground.TurnSpeedFactor = running.TurnSpeedFactor * math.lerp(
-			1,
-			running.HardLanding.ShockTurnScale,
-			shock
-		)
+		ground.AccelerationTime = running.Acceleration
+		ground.DecelerationTime = running.Acceleration
+		ground.TurnSpeedFactor = 1
+		ground.Friction = running.Grip
 
-		local landing = running.HardLanding
-		local carrying = time() < (movement.LandingCarryUntil or 0)
-		if carrying and movement.LandingCarryDirection.Magnitude > 0.001 then
-			local requested = wish == Vector3.zero and movement.LandingCarryDirection or wish
-			local control = landing.ControlScale * math.lerp(1, landing.ShockControlScale, shock)
-			local steered = movement.LandingCarryDirection:Lerp(requested, control)
-			wish = steered.Magnitude > 0.001 and steered.Unit or Vector3.zero
+		local carrying = time() < movement.LandingCarryUntil
+		if carrying and wish == Vector3.zero then
+			wish = movement.LandingDirection
 		end
 
-		local counterSteering = wish ~= Vector3.zero and speed > 0.1 and velocity.Unit:Dot(wish) < 0
-		local fast = math.clamp((speed - running.MoveSpeed) / math.max(running.MomentumRange, 0.01), 0, 1)
-		ground.Friction = if carrying
-			then landing.Friction
-			elseif time() < (movement.PushGripUntil or 0)
-			then running.FastFriction
-			elseif counterSteering
-			then running.CounterFriction
-			else math.lerp(running.Friction, running.FastFriction, fast)
-
 		movement.CM.MovingDirection = wish
-		movement.CM.BaseMoveSpeed = math.max(running.MoveSpeed, speed)
+		movement.CM.BaseMoveSpeed = math.max(running.Speed, carrying and movement.LandingSpeed or 0)
 		return
 	end
 

@@ -9,7 +9,7 @@ local Shoot = Bindables:WaitForChild("Shoot")
 
 local WeaponObserver = require(script.Parent.Utils.WeaponObserver)
 
-local BASE_GAP = 22
+local BASE_GAP = 9
 local PIXELS_PER_SPREAD = 2.5
 
 local FIRE_KICK_STEP = 30

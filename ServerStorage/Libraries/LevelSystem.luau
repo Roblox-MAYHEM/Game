@@ -35,7 +35,6 @@ function LevelSystem.LevelUp(plr : Player)
 end
 
 function LevelSystem.AddExp(plr : Player, amt : number, msg : string?)
-	print(get(plr, {"Level"}))
 	local exp = get(plr, {"Exp"})
 	local level = get(plr, {"Level"})
 	
@@ -65,7 +64,6 @@ function LevelSystem.AddWeaponExp(plr : Player, weapon : string, amt : number)
 	local exp = get(plr, {"Inventory",weapon, "Exp"})
 	local level = get(plr, {"Inventory",weapon, "Level"})
 	
-	print(DataManager.GetData(plr, {"Inventory",weapon}), amt)
 	exp += amt
 		
 	while exp >= LevelSystem.ExpForWeaponLvl(level) do
@@ -77,12 +75,9 @@ function LevelSystem.AddWeaponExp(plr : Player, weapon : string, amt : number)
 end
 
 function LevelSystem.AwardKill(Killer : Player, PlayerKilled : Player)
-	print("Award kill")
 	LevelSystem.AddExp(Killer, 40, "Killed " .. PlayerKilled.Name)
-		
-	print(get(Killer, {"Hotbar"}))
+
 	for _, w in get(Killer, {"Hotbar"}) do
-		print(w)
 		LevelSystem.AddWeaponExp(Killer, w, 30)
 	end
 end

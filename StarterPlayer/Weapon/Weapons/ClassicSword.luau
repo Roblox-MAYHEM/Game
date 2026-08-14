@@ -76,43 +76,48 @@ function Weapon:Equip()
 	self.Animations.Idle:Play()
 end
 
-function Weapon:_RunHit(token, info, hitbox, serverAction)
+function Weapon:_RunHit(action, info, hitbox, serverAction)
 	task.wait(info.HIT_DELAY)
-	if not self:IsActionCurrent(token) then return false end
+	if self.Action ~= action then return false end
 
 	Remotes.WeaponEvent:FireServer(serverAction)
 	hitbox:HitStart(info.HIT_TIME)
 	task.wait(info.HIT_TIME)
-	if not self:IsActionCurrent(token) then return false end
+	if self.Action ~= action then return false end
 	hitbox:HitStop()
 
 	task.wait(math.max(info.TIME - info.HIT_DELAY - info.HIT_TIME, 0))
-	return self:IsActionCurrent(token)
+	return self.Action == action
 end
 
 function Weapon:Attack()
 	if not self.States.Equipped or self.States.Acting then return end
-	local token = self:NewActionToken()
+	local action = {}
+	self.Action = action
 	self.States.Acting = true
 	self.Animations.Slash:SetDuration(self.AttackInfo.TIME)
 	self.Animations.Slash:Play()
-	self.Sounds.Swing:Play()
+	if self.Sounds.Swing then self.Sounds.Swing:Play() end
 
 	task.spawn(function()
-		if not self:_RunHit(token, self.AttackInfo, self.AttackHitbox, "AttackStart") then return end
+		if not self:_RunHit(action, self.AttackInfo, self.AttackHitbox, "AttackStart") then return end
 		task.wait(self.AttackInfo.COOLDOWN)
-		if self:IsActionCurrent(token) then self.States.Acting = false end
+		if self.Action == action then
+			self.Action = nil
+			self.States.Acting = false
+		end
 	end)
 end
 
 function Weapon:Lunge()
 	if not self.States.Equipped or self.States.Acting then return end
-	local token = self:NewActionToken()
+	local action = {}
+	self.Action = action
 	self.States.Acting = true
 	self:_SetGrip(self.LungeInfo.GRIP_OUT)
 	self.Animations.Lunge:SetDuration(self.LungeInfo.TIME)
 	self.Animations.Lunge:Play()
-	self.Sounds.Swing:Play()
+	if self.Sounds.Swing then self.Sounds.Swing:Play() end
 	self.Movement:StartLunge(workspace.CurrentCamera.CFrame.LookVector, {
 		Duration = self.LungeInfo.TIME,
 		Gain = self.LungeInfo.FORWARD_GAIN,
@@ -123,15 +128,19 @@ function Weapon:Lunge()
 	self.Movement:ApplyImpulse(float.Unit, float.Magnitude)
 
 	task.spawn(function()
-		if not self:_RunHit(token, self.LungeInfo, self.LungeHitbox, "Lunge") then return end
+		if not self:_RunHit(action, self.LungeInfo, self.LungeHitbox, "Lunge") then return end
 		self:_SetGrip()
 		task.wait(self.LungeInfo.COOLDOWN)
-		if self:IsActionCurrent(token) then self.States.Acting = false end
+		if self.Action == action then
+			self.Action = nil
+			self.States.Acting = false
+		end
 	end)
 end
 
 function Weapon:Unequip()
 	self:_Unequip()
+	self.Action = nil
 	self.States.Equipping = false
 	self.States.Equipped = false
 	self.States.Acting = false

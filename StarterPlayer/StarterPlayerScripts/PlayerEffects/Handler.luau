@@ -1,10 +1,8 @@
 -- PlayerEffects.luau
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService		= game:GetService("RunService")
 local SoundService      = game:GetService("SoundService")
 local Client            = game:GetService("StarterPlayer")
 local Debris = game:GetService("Debris")
-local Player			= game:GetService("Players").LocalPlayer
 
 local Events       = ReplicatedStorage.Events
 local Components = Client.Components
@@ -15,16 +13,13 @@ local HitHighlight = require(Components.HitHighlight)
 -- Load named effect modules from children (e.g. ExplosionEffect, MuzzleFlash)
 local function loadEffectModules(parent: Instance): { [string]: { Play: (...any) -> () } }
 	local t = {}
-	for _, v in ipairs(parent:GetChildren()) do
-		if v:IsA("ModuleScript") then
-			t[v.Name] = require(v)
+	for _, child in ipairs(parent:GetChildren()) do
+		local module = if child:IsA("ModuleScript") then child elseif child:IsA("Folder") then child:FindFirstChild("init") else nil
+		if module and module:IsA("ModuleScript") then
+			t[child.Name] = require(module)
 		end
 	end
 	return t
-end
-
-local function projectOnPlane(vec, normal)
-	return vec - vec:Dot(normal.Unit) * normal.Unit
 end
 
 local NO_SOUND_BELOW_DAMAGE = 5
@@ -92,33 +87,6 @@ function module:Init(properties)
 
 	trove:Connect(Events.ReplicateEffect.OnClientEvent, function(effect: string, ...)
 		module.PlayEffect(effect, ...)  -- play locally without re-firing server
-	end)
-	
-	local SpeedLines = Client.Assets:WaitForChild("SpeedLines")
-	SpeedLines = trove:Clone(SpeedLines)
-
-	local Camera = workspace.CurrentCamera
-	local ViewportSize = Camera.ViewportSize
-	local AspectRatio = ViewportSize.X/ViewportSize.Y
-
-	local Humanoid = Player.Character:WaitForChild("Humanoid") :: Humanoid
-
-	SpeedLines.Parent = Camera
-	
-	local MIN_SPEED = 20
-	local OFFSET = 10
-	local root = Player.Character:WaitForChild("HumanoidRootPart")
-	
-	trove:Connect(RunService.RenderStepped, function()
-		SpeedLines.CFrame = Camera.CFrame + Camera.CFrame.LookVector * (OFFSET / Camera.FieldOfView * 70)
-
-		local velocity = root.AssemblyLinearVelocity
-		local speed = Vector3.new(velocity.X, 0, velocity.Z).Magnitude
-
-		local enabled = speed >= MIN_SPEED
-		SpeedLines.Attachment.ParticleEmitter.Enabled = enabled
-
-		Camera.FieldOfView = 70 + math.clamp(speed / 2, 0, 20)
 	end)
 end
 

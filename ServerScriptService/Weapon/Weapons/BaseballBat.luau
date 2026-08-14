@@ -121,7 +121,6 @@ function Weapon:Special()
 	local charge = math.clamp((time() - self.WindupStarted) / self.WindupInfo.TIME, 0, 1)
 	self:CancelWindup()
 
-	local duration = self.SpecialInfo.HIT_TIME
 	local attack = {
 		EndTime = math.huge,
 		IsSpecial = true,

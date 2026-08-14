@@ -56,16 +56,16 @@ end
 function Weapon:AttackStart(swingIndex)
 	local index = math.clamp(tonumber(swingIndex) or 1, 1, 3)
 	local info = self:_SwingInfo(index)
-	local token = {}
+	local attack = {}
 
-	self.AttackToken = token
+	self.CurrentAttack = attack
 	self.SwingIndex = index
 	self.ActiveContact = true
 	self:_ConfigureValidator(info)
 	self.AttackValidator:BeginAttack()
 
 	task.delay(info.HIT_TIME or self.AttackInfo.HIT_TIME, function()
-		if self.AttackToken ~= token then return end
+		if self.CurrentAttack ~= attack then return end
 		self.ActiveContact = false
 		self.AttackValidator:EndAttack()
 	end)
@@ -107,7 +107,7 @@ end
 function Weapon:Unequip(force: boolean?)
 	if not force and not self:CanUnequip() then return false end
 
-	self.AttackToken = nil
+	self.CurrentAttack = nil
 	self.ActiveContact = false
 	self.SwingIndex = 1
 	self.AttackValidator:Cleanup()
