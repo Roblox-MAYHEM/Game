@@ -34,7 +34,7 @@ function Vault:Update(movement, _dt)
 		movement:Boost(self.Direction, config.Speed - currentForward, config.Speed)
 		local up = movement.CM.UpDirection
 		local currentUp = movement.HRP.AssemblyLinearVelocity:Dot(up)
-		movement:ApplyImpulse(up, math.max(movement.Config.Jump.Strength - currentUp, 0))
+		movement:ApplyJumpImpulse(up, math.max(movement.Config.Jump.Strength - currentUp, 0))
 		return false
 	end
 	return time() < self.EndsAt

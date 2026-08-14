@@ -33,8 +33,8 @@ function WallRun:Jump(movement)
 	if not wall then return false end
 
 	local config = movement.Config.Actions.WallRun
-	movement:ApplyImpulse(wall.Normal, config.JumpStrength)
-	movement:ApplyImpulse(movement.CM.UpDirection, config.JumpStrength)
+	movement:ApplyJumpImpulse(wall.Normal, config.JumpStrength)
+	movement:ApplyJumpImpulse(movement.CM.UpDirection, config.JumpStrength)
 	return true
 end
 

@@ -685,7 +685,6 @@ return {
 
 		["Equip"] = {
 			TIME = 0.25,
-			JOINT_C1 = CFrame.new(0, 0, -1.70000005, 0, 0, 1, 1, 0, 0, 0, 1, 0),
 			CAM_OFFSET = CFrame.new(0, 0, -1),
 			CAN_SWAY = true,
 			TILT = 8,
@@ -724,7 +723,7 @@ return {
 			FLOAT_VELOCITY = Vector3.new(0, 16, 0),
 			FORWARD_GAIN = 16,
 			FORWARD_CAP = 40,
-			GRIP_OUT = CFrame.new(0, 0, -0.75),
+			GRIP_OUT =CFrame.Angles(math.rad(90),0,0) *  CFrame.new(0, .8, 1),
 			IMPACT_POWER = 18,
 			FINISHER_MULTIPLIER = 1.15,
 			FINISHER_Y = 10,

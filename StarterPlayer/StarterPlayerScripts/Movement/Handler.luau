@@ -133,6 +133,10 @@ function Movement:ApplyImpulse(direction: Vector3, strength: number)
 	self.HRP:ApplyImpulse(direction.Unit * strength * self.BaseMass)
 end
 
+function Movement:ApplyJumpImpulse(direction: Vector3, strength: number)
+	self.HRP:ApplyImpulse(direction.Unit * strength * self.HRP.AssemblyMass)
+end
+
 function Movement:Boost(direction: Vector3, gain: number, maxSpeed: number)
 	if not self.Ready or typeof(direction) ~= "Vector3" or direction.Magnitude <= 0.001 then return 0 end
 	gain = math.max(tonumber(gain) or 0, 0)
@@ -217,8 +221,8 @@ function Movement:TryJump()
 		return false
 	end
 	if now < (self.WallJumpUntil or 0) then
-		self:ApplyImpulse(self.WallJumpNormal, self.Config.Actions.WallRun.JumpStrength)
-		self:ApplyImpulse(self.CM.UpDirection, self.Config.Actions.WallRun.JumpStrength)
+		self:ApplyJumpImpulse(self.WallJumpNormal, self.Config.Actions.WallRun.JumpStrength)
+		self:ApplyJumpImpulse(self.CM.UpDirection, self.Config.Actions.WallRun.JumpStrength)
 		self.WallJumpUntil = 0
 		self.JumpCooldownUntil = now + self.Config.Jump.Cooldown
 		return true
@@ -233,7 +237,7 @@ function Movement:TryJump()
 	if self.Frame.Grounded then
 		self:Boost(self.Frame.MoveVelocity, config.Boost, config.MaxSpeed)
 	end
-	self:ApplyImpulse(self.CM.UpDirection, config.Strength)
+	self:ApplyJumpImpulse(self.CM.UpDirection, config.Strength)
 	self.JumpCooldownUntil = now + config.Cooldown
 	return true
 end
